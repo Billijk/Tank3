@@ -1,0 +1,7 @@
+exports.PORT = 5000;
+exports.PHYSICS_LOOP_INTERVAL = 15;
+exports.UPDATE_LOOP_INTERVAL = 45;
+
+var TANK_SPEED = 2.5;
+var WIDTH = 600;
+var HEIGHT = 450;
