@@ -12,6 +12,14 @@ function init() {
 	});
 }
 
+function start() {
+	onkeyup = onkeydown = function(event) {
+		var keyPressed = String.fromCharCode(event.keyCode);
+		downkeys[keyPressed] = event.type == 'keydown';
+	}
+	update();
+}
+
 function update() {
 	clear();
 	drawGUI();
@@ -23,7 +31,7 @@ function update() {
 }
 
 function clear() {
-	context.clearRect(0, 0, WIDTH, HEIGHT);
+	context.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
 }
 function drawGUI() {
 }
@@ -36,10 +44,3 @@ function updatePos() {
 function drawTanks() {
 }
 
-function start() {
-	onkeyup = onkeydown = function(event) {
-		var keyPressed = String.fromCharCode(event.keyCode);
-		downkeys[keyPressed] = event.type == 'keydown';
-	}
-	update();
-}
