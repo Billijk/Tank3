@@ -21,6 +21,10 @@
 	app.get('/', function(req, res) {
 		res.sendFile('index.html', {root: '../'});
 	});
+    app.get( '/*' , function( req, res, next ) {
+        var file = req.params[0];
+        res.sendFile( file, {root: '../'} );
+	});
 
 	// set up Socket.IO server
 	io.on('connection', function(client) {
