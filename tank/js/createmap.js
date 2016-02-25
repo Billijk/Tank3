@@ -39,4 +39,5 @@ function createMap(n,m)
 		drawLine(0,a*perWidth,0,(a+1)*perWidth);
 		drawLine(n*perWidth,a*perWidth,n*perWidth,(a+1)*perWidth);
 	}
+	drawLine(1000,1000,1000,1000);
 }
