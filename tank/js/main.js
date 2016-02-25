@@ -8,7 +8,11 @@ function init() {
 	context = mainCanvas.getContext("2d");
 	socket = io();
 	socket.on('onconnected', function( data ) {
-		console.log( 'Connected successfully to the socket.io server. My server side ID is ' + data.id );
+		console.log('Connected successfully to the socket.io server. My server side ID is ' + data.id);
+		utils.prototype.drawMap(context, data.map);
+
+		socket.on('gameinfo', function( data ) {
+		});
 	});
 }
 
