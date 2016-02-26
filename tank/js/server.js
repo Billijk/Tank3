@@ -67,7 +67,7 @@
 		this.gameStatusEnum = { IDLE: 1, RUN: 2 };
 		this.gameStatus = this.gameStatusEnum.IDLE;
 
-		this.map = {n: 0, m: 0, walls: {}};
+		this.map = {n: 0, m: 0, k: 0, walls: {}, player:[]};	
 
 		this.userConnect = function(client) {
 			if (!this.clients[client.userid]) {
@@ -85,9 +85,11 @@
 
 		this.startNewScene = function() {
 			this.sceneCount ++;
-			this.map.n = Math.floor(Math.random() * 10 + 3);
+			this.map.n = Math.floor(Math.random() * 20 + 3);
 			this.map.m = Math.max(this.map.n + Math.floor(Math.random() * 8 - 4), 3);
+			this.map.k = 4;
 			this.map.walls = utils.prototype.createMap(this.map.n, this.map.m);
+			this.map.player = utils.prototype.createPlayer(this.map.n,this.map.m,this.map.walls.hori,this.map.walls.vert,this.map.k);
 			this.physicsLoop();
 			this.updateLoop();
 		}
