@@ -8,8 +8,8 @@ window.requestAnimFrame = (function() {
 // player class saves player properties
 var player = function() {
 	this.BULLETS = 5;
-	this.TANK_SPEED = 0.25;
-	this.TANK_ROTATE_SPEED = 0.15;
+	this.TANK_SPEED = 0.025;
+	this.TANK_ROTATE_SPEED = 0.05;
 
 	this.id;
 	this.pos = { x:0, y:0 };
@@ -23,6 +23,11 @@ var player = function() {
 		this.pos.x = this.pos.y = this.angle = this.score = this.equipment = 0;
 		this.restBullets = this.BULLETS;
 	};
+
+	// TODO: complete this function
+	this.fire = function() {
+		console.log("there should be a bullet");
+	}
 };
 
 // bullet class deals with bullet properties

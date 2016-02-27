@@ -3,6 +3,8 @@ var socket;
 var mainCanvas, mapCanvas, mainContext, mapContext;
 var tileSize;
 var downkeys = [];
+var fired = false;	// this ensures one shoot per click on space key
+
 var game;
 
 // ClientGameCore class
@@ -43,6 +45,7 @@ function init() {
 	mainContext = mainCanvas.getContext("2d");
 	mapCanvas = document.getElementById("mapCanvas");
 	mapContext = mapCanvas.getContext("2d");
+
 	socket = io();
 	socket.on('onconnected', function( data ) {
 		console.log('Connected successfully to the socket.io server. My server side ID is ' + data.id);
@@ -118,7 +121,9 @@ function handleInput() {
 	if (downkeys[83] || downkeys[40]) info.back = flag = true;
 	if (downkeys[65] || downkeys[37]) info.left = flag = true;
 	if (downkeys[68] || downkeys[39]) info.right = flag = true;
-	if (downkeys[32]) info.fire = flag = true;
+	if (downkeys[32]) {
+		if (!fired) info.fire = fired = flag = true;
+	} else fired = false;
 	if (flag) {
 		console.log(info);
 		socket.emit('message', {type: 'move', move : info});

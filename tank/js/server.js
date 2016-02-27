@@ -15,7 +15,7 @@
 	var UUID = require('node-uuid');
 
 	// variables with games
-	var games = [];
+	var games = {};
 	var gameCounts = 0;
 
 	// set up Express server
@@ -91,6 +91,7 @@
 				delete this.players[client.userid];
 				this.clientCount --;
 			}
+			if (this.clientCount == 0) delete this;
 		}
 
 		this.startNewScene = function() {
@@ -110,20 +111,14 @@
 				this.players[id].pos.y = positions[i][1];
 			}
 
-			xxx = new bullet();
-			xxx.pos.x=0.5;
-			xxx.pos.y=0.5;
-			xxx.angle=Math.PI/4;
-
-			this.bullets.push(xxx);
-
 			this.physicsLoop();
 			this.updateLoop();
 		}
 
 		// update game logics
 		this.physicsLoop = function() {
-			this.bullets[0].next(this.map.n,this.map.m,this.map.walls.hori,this.map.walls.vert);
+			for (var i = 0; i < this.bullets.length; ++ i)
+				this.bullets[i].next(this.map.n,this.map.m,this.map.walls.hori,this.map.walls.vert);
 			setTimeout(this.physicsLoop.bind(this), PHYSICS_LOOP_INTERVAL);
 		}
 
@@ -166,6 +161,7 @@
 			}
 			if (move.left) tank.angle -= tank.TANK_ROTATE_SPEED;
 			if (move.right) tank.angle += tank.TANK_ROTATE_SPEED;
+			if (move.fire) tank.fire();
 		}
 	}
 
