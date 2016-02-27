@@ -95,10 +95,14 @@
 			this.map.n = Math.floor(Math.random() * 10 + 3);
 			this.map.m = Math.max(this.map.n + Math.floor(Math.random() * 8 - 4), 3); //m viberates a little around n , at least 3
 			this.map.walls = utils.prototype.createMap(this.map.n, this.map.m);
+			var positions = utils.prototype.createPlayer(this.map.n,this.map.m,this.map.walls.hori,this.map.walls.vert,this.clientCount);
 
 			// init player info
+			var i = 0;
 			for (var id in this.players) {
 				this.players[id].init();
+				this.players[id].pos.x = positions[i][0];
+				this.players[id].pos.y = positions[i][1];
 			}
 
 			this.physicsLoop();
