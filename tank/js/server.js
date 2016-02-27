@@ -33,12 +33,18 @@
 	// set up Socket.IO server
 	io.on('connection', function(client) {
 		client.userid = UUID();
-		//var gameInfo = findGame();
+		var gameInfo = findGame();
+		var game;
 		
-		//!!! now debug! directly into new game
-		var game = createNewGame();
-		games[game].userConnect(client);
-		games[game].startNewScene();
+		// TODO: add a game chooser
+		if (gameInfo.length == 0) {
+			game = createNewGame();
+			games[game].userConnect(client);
+			games[game].startNewScene();
+		} else {
+			game = gameInfo[0].id;
+			games[game].userConnect(client);
+		}
 
 		client.emit('onconnected', { id: client.userid, map: games[game].map } );
 		console.log('socket.io:: player ' + client.userid + ' connected');
@@ -67,7 +73,7 @@
 		this.clientCount = 0;
 		this.clients = {};
 
-		this.gameStatusEnum = { IDLE: 1, RUN: 2 };
+		this.gameStatusEnum = { IDLE: 1, RUN: 2, FINISHED: 3 };
 		this.gameStatus = this.gameStatusEnum.IDLE;
 
 		this.map = {n: 0, m: 0, walls: {}};
@@ -82,7 +88,13 @@
 
 				// add new player
 				this.players[client.userid] = new player();
-				this.players[client.userid].id= client.userid;
+				this.players[client.userid].id = client.userid;
+				if (this.gameStatus == this.gameStatusEnum.RUN) {
+					var positions =  utils.prototype.createPlayer(this.map.n,this.map.m,this.map.walls.hori,this.map.walls.vert,1);
+					this.players[client.userid].init();
+					this.players[client.userid].pos.x = positions[0][0];
+					this.players[client.userid].pos.y = positions[0][1];
+				}
 			}
 		}
 		this.userDisconnect = function(client) {
@@ -91,11 +103,15 @@
 				delete this.players[client.userid];
 				this.clientCount --;
 			}
-			if (this.clientCount == 0) delete this;
+			if (this.clientCount == 0) {
+				gameCounts --;
+				this.gameStatus = this.gameStatusEnum.FINISHED;
+			}
 		}
 
 		this.startNewScene = function() {
 			this.sceneCount ++;
+			this.gameStatus = this.gameStatusEnum.RUN;
 
 			// build map
 			this.map.n = Math.floor(Math.random() * 10 + 3);
@@ -110,6 +126,8 @@
 				this.players[id].pos.x = positions[i][0];
 				this.players[id].pos.y = positions[i][1];
 			}
+
+			for ()
 
 			this.physicsLoop();
 			this.updateLoop();
@@ -180,7 +198,13 @@
 	// return a list of games available now
 	function findGame() {
 		var availableGames = [];
-
+		for (var id in games) {
+			if (games[id].gameStatus == games[id].gameStatusEnum.FINISHED) delete games[id];
+			else {
+				// TODO: add a filter
+				availableGames.push(games[id]);
+			}
+		}
 		return availableGames;
 	};
 
