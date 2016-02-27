@@ -4,8 +4,8 @@ var mainCanvas, mapCanvas, mainContext, mapContext;
 var tileSize;
 var downkeys = [];
 var fired = false;	// this ensures one shoot per click on space key
-var states = { WAIT: 1, RUN: 2 };
-var currentState = states.WAIT;
+var states = { NONE: 1, WAIT: 2, RUN: 3 };
+var currentState = states.NONE;
 
 var game;
 
@@ -41,8 +41,8 @@ var ClientGameCore = function() {
 		drawMap();
 		updateGUI();
 
-		if (currentState == states.WAIT) {
-			currentState = states.RUN;
+		if (currentState == states.NONE) {
+			currentState = states.WAIT;
 			update();
 		}
 	};
@@ -98,12 +98,20 @@ function init() {
 
 function start() {
 	time_point = Date.now();
+	game = new ClientGameCore();
+	startScene();
+}
+
+function enter() {
+	var request = {type: 'join_game', nickname: $('#nickname').val()}
+	socket.emit('message', {type: 'req', req: request});
+	$('#nickname').val("");
+	$('#input').hide();
 	onkeyup = onkeydown = function(event) {
 		var keyPressed = event.keyCode;
 		downkeys[keyPressed] = event.type == 'keydown';
 	}
-	game = new ClientGameCore();
-	startScene();
+	gameStatus = states.RUN;
 }
 
 function startScene() {
@@ -112,13 +120,17 @@ function startScene() {
 
 function update() {
 	getTimeInfo();
-	if (currentState != states.RUN) return;
+	if (currentState != states.RUN && currentState != states.WAIT) return;
 
 	clear(mainContext);
-	handleInput();
-	updatePos();
 	drawTanks();
 	drawBullets();
+
+	if (currentState != states.RUN) {
+		handleInput();
+		updatePos();
+	}
+
 	requestAnimFrame(update);
 }
 
@@ -198,6 +210,7 @@ function drawTanks() {
 		var y = (game.players[id].pos.y) * tileSize + 5;
 		var r = tileSize * game.players[id].radius;
 		var angle = game.players[id].angle;
+		console.log(x + ' ' + y);
 		mainContext.beginPath();
 		mainContext.strokeStyle = game.players[id].color;
 		mainContext.arc(x, y, r, 0, Math.PI*2);
