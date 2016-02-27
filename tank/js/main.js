@@ -5,15 +5,13 @@ var tileSize;
 var downkeys = [];
 var game;
 
-var xxx;
-
 // ClientGameCore class
 // save game info for clients
 var ClientGameCore = function() {
 	this.sceneCount = 0;
 	this.map = {};
 	this.players = {};
-	this.bullets = {};
+	this.bullets = [];
 
 	this.newScene = function() {
 		this.sceneCount ++;
@@ -47,7 +45,7 @@ function init() {
 			switch(data.type) {
 			case 'newscene' : game.onNewScene(data.map, data.players);
 							  break;
-			case 'serverupdate' : game.onServerUpdate();
+			case 'serverupdate' : game.onServerUpdate(data.players, data.bullets);
 								  break;
 			}
 		});
@@ -124,8 +122,8 @@ function updatePos() {
 function drawTanks() {
 	context.lineWidth = 1;
 	for (var id in game.players) {
-		var x = (game.players[id].pos.x + 0.5) * tileSize + 5;
-		var y = (game.players[id].pos.y + 0.5) * tileSize + 5;
+		var x = (game.players[id].pos.x) * tileSize + 5;
+		var y = (game.players[id].pos.y) * tileSize + 5;
 		var r = tileSize / 6;
 		context.beginPath();
 		context.arc(x, y, r, 0, Math.PI*2);
@@ -133,10 +131,10 @@ function drawTanks() {
 	}
 }
 function drawBullets() {
-	x=game.bullets.pos.x;
-	y=game.bullets.pos.y;
-	context.moveTo(x*perWidth+perWidth+5,y*perWidth+perWidth/2+5);
-	context.arc(x*perWidth+perWidth/2+5,y*perWidth+perWidth/2+5,perWidth/2,Math.PI*2,false);
+	x=game.bullets[0].pos.x;
+	y=game.bullets[0].pos.y;
+	context.beginPath();
+	context.arc(x*tileSize+5,y*tileSize+5,tileSize/100.0,0,Math.PI*2);
 	context.stroke();
 }
 
