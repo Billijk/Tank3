@@ -50,8 +50,8 @@ var player = function() {
 		availableTime=1;
 		x = Math.floor(this.pos.x);
 		y = Math.floor(this.pos.y);
-		vx = Math.cos(this.angle)*direction;
-		vy = Math.sin(this.angle)*direction;
+		vx = Math.cos(this.angle)*direction*this.TANK_SPEED;
+		vy = Math.sin(this.angle)*direction*this.TANK_SPEED;
 		if (vx<0)
 		{
 			if (x==0 || down[x-1][y]==1) availableTime=Math.min(availableTime,Math.abs((this.pos.x-this.radius-x)/vx));
@@ -68,8 +68,29 @@ var player = function() {
 		{
 			if (y==m-1 || right[x][y]==1) availableTime=Math.min(availableTime,Math.abs((y+1-this.pos.y-this.radius)/vy));
 		}
-		this.pos.x += this.TANK_SPEED*vx*availableTime;
-		this.pos.y += this.TANK_SPEED*vy*availableTime;
+		l=0;r=1;
+		for (var a=0;a<100;a++)
+		{
+			m=(l+r)/2.0;
+			able=1;
+			newx = this.pos.x+vx*m;
+			newy = this.pos.y+vy*m;
+			for (var b=0;b<=1;b++)
+				for (var c=0;c<=1;c++)
+				{
+					xx = x+b;
+					yy = y+c;
+					if (xx==0 || yy==0 || xx>=n || yy>=m || down[xx-1][yy] || right[xx][yy-1])
+					{
+						if ((xx-newx)*(xx-newx)+(yy-newy)*(yy-newy)<=this.radius*this.radius) able=0;
+					}
+				}
+			if (able==0) r=m;
+			else l=m;
+		}
+		r=Math.min(r,availableTime);
+		this.pos.x += vx*r;
+		this.pos.y += vy*r;
 	}
 };
 
