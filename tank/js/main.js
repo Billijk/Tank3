@@ -81,7 +81,7 @@ function update() {
 	handleInput();
 	updatePos();
 	drawTanks();
-	//drawBullets();
+	drawBullets();
 	requestAnimFrame(update);
 }
 
@@ -137,9 +137,10 @@ function drawTanks() {
 	mainContext.lineWidth = 1;
 	mainContext.strokestyle = "#000000";
 	for (var id in game.players) {
+		if (game.players[id].equipment==-1) continue;
 		var x = (game.players[id].pos.x) * tileSize + 5;
 		var y = (game.players[id].pos.y) * tileSize + 5;
-		var r = tileSize / 6;
+		var r = tileSize * game.players[id].radius;
 		var angle = game.players[id].angle;
 		mainContext.beginPath();
 		mainContext.arc(x, y, r, 0, Math.PI*2);
@@ -149,11 +150,14 @@ function drawTanks() {
 	}
 }
 function drawBullets() {
-	x=game.bullets[0].pos.x;
-	y=game.bullets[0].pos.y;
-	context.beginPath();
-	context.arc(x*tileSize+5,y*tileSize+5,tileSize/100.0,0,Math.PI*2);
-	context.stroke();
+	for (var i = 0; i < game.bullets.length; ++ i)
+	{
+		x=game.bullets[i].pos.x;
+		y=game.bullets[i].pos.y;
+		mainContext.beginPath();
+		mainContext.arc(x*tileSize+5,y*tileSize+5,tileSize/100.0,0,Math.PI*2);
+		mainContext.stroke();
+	}
 }
 
 function drawLine(context, x1,y1,x2,y2)

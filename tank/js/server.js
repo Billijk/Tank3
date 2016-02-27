@@ -119,6 +119,18 @@
 		this.physicsLoop = function() {
 			for (var i = 0; i < this.bullets.length; ++ i)
 				this.bullets[i].next(this.map.n,this.map.m,this.map.walls.hori,this.map.walls.vert);
+			for (var a in this.players)
+				if (this.players[a].equipment>=0)
+					for (var b=0;b<this.bullets.length;b++)
+					{
+						GG=this.players[a].CheckGG(this.bullets[b]);
+						if (GG==1) this.bullets[b].restTime=0;
+					}
+			help=[];
+			for (var i = 0; i < this.bullets.length; i++)
+				if (this.bullets[i].restTime!=0) help.push(this.bullets[i]);
+				else this.players[this.bullets[i].owner].restBullets++;
+			this.bullets=help;
 			setTimeout(this.physicsLoop.bind(this), PHYSICS_LOOP_INTERVAL);
 		}
 
@@ -150,7 +162,7 @@
 	}
 	function clientMove(client, move) {
 		var tank = games[client.gameid].players[client.userid];
-		if (tank) {
+		if (tank && tank.equipment>=0) {
 			if (move.forward) {
 				tank.pos.x += tank.TANK_SPEED * Math.cos(tank.angle);
 				tank.pos.y += tank.TANK_SPEED * Math.sin(tank.angle);
@@ -161,7 +173,7 @@
 			}
 			if (move.left) tank.angle -= tank.TANK_ROTATE_SPEED;
 			if (move.right) tank.angle += tank.TANK_ROTATE_SPEED;
-			if (move.fire) tank.fire();
+			if (move.fire && tank.restBullets>0) games[client.gameid].bullets.push(tank.fire());
 		}
 	}
 
