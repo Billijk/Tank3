@@ -34,7 +34,7 @@ var bullet = function() {
 	this.angle;
 	this.restTime;
 	this.owner;
-	this.speed = 0.05;
+	this.speed = 0.02;
 
 	this.init = function() {
 		this.pos.x = this.pos.y = this.angle = this.owner = 0;
@@ -53,28 +53,27 @@ var bullet = function() {
 		if (Math.abs(x-nx)+Math.abs(y-ny)==0) this.pos={x:newx,y:newy};
 		else
 		{
-			if (Math.abs(x-nx)+Math.abs(y-ny)==1)
+			if (Math.abs(x-nx)+Math.abs(y-ny)>=1)
 			{
 				collide=0;
 				collidetime=0;
 				newangle=this.angle;
 				if (nx<0 || nx>=n || ny<0 || ny>=m)
 				{
-					if (nx<0) newangle=2*Math.PI-newangle,collidetime=this.pos.x/vx;
-					if (nx>=n) newangle=2*Math.PI-newangle,collidetime=(n-this.pos.x)/vx;
-					if (ny<0) newangle=Math.PI-newangle,collidetime=this.pos.y/vy;
-					if (ny>=m) newangle=Math.PI-newangle,collidetime=(m-this.pos.y)/vy;
+					collide=1;
+					if (nx<0) newangle=Math.PI-newangle,collidetime=this.pos.x/vx;
+					if (nx>=n) newangle=Math.PI-newangle,collidetime=(n-this.pos.x)/vx;
+					if (ny<0) newangle=2*Math.PI-newangle,collidetime=this.pos.y/vy;
+					if (ny>=m) newangle=2*Math.PI-newangle,collidetime=(m-this.pos.y)/vy;
 				}
 				else
 				{
 					if (Math.abs(nx-x)==1)
 					{
-						console.log(x+' '+y);
-						console.log(nx+' '+ny);
 						if ((x<nx && down[x][y]==1) || (nx<x && down[nx][ny]==1))
 						{
 							collide=1;
-							newangle=2*Math.PI-newangle;
+							newangle=Math.PI-newangle;
 							if (x<nx) collidetime=(nx-this.pos.x)/vx;
 							else collidetime=(this.pos.x-x)/vx;
 						}
@@ -84,24 +83,31 @@ var bullet = function() {
 						if ((y<ny && right[x][y]==1) || (ny<y && right[nx][ny]==1))
 						{
 							collide=1;
-							newangle=Math.PI-newangle;
+							newangle=2*Math.PI-newangle;
 							if (y<ny) collidetime=(ny-this.pos.y)/vy;
 							else collidetime=(this.pos.y-y)/vy;
 						}
 					}
 				}
-				if (collide)
+				collidetime=Math.abs(collidetime);
+				if (collide==1)
 				{
 					newx=this.pos.x+collidetime*vx;
 					newy=this.pos.y+collidetime*vy;
-					vx=Math.sin(newangle);
-					vy=Math.cos(newangle);
+					vx=Math.cos(newangle)*this.speed;
+					vy=Math.sin(newangle)*this.speed;
 					newx+=(1-collidetime)*vx;
 					newy+=(1-collidetime)*vy;
+					this.pos.x=newx;
+					this.pos.y=newy;
+					this.angle=newangle;
 				}
-				this.pos.x=newx;
-				this.pos.y=newy;
-				this.angle=newangle;
+				else
+				{
+					this.pos.x=newx;
+					this.pos.y=newy;
+					this.angle=newangle;
+				}
 			}
 		}
 	}
@@ -217,7 +223,7 @@ utils.prototype.createPlayer = function(n,m,right,down,k)
 				if (pos[b][0]==x && pos[b][1]==y) able=0;
 			if (able)
 			{
-				pos[a]=[x,y];
+				pos[a]=[x+0.5,y+0.5];
 				break;
 			}
 		}

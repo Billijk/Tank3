@@ -110,10 +110,12 @@
 				this.players[id].pos.y = positions[i][1];
 			}
 
-			this.bullets = new bullet();
-			this.bullets.pos.x=Math.random()*this.map.n;
-			this.bullets.pos.y=Math.random()*this.map.m;
-			this.bullets.angle=Math.random()*2*Math.PI;
+			xxx = new bullet();
+			xxx.pos.x=0.5;
+			xxx.pos.y=0.5;
+			xxx.angle=Math.PI/4;
+
+			this.bullets.push(xxx);
 
 			this.physicsLoop();
 			this.updateLoop();
@@ -121,6 +123,7 @@
 
 		// update game logics
 		this.physicsLoop = function() {
+			this.bullets[0].next(this.map.n,this.map.m,this.map.walls.hori,this.map.walls.vert);
 			setTimeout(this.physicsLoop.bind(this), PHYSICS_LOOP_INTERVAL);
 		}
 
@@ -128,6 +131,8 @@
 		this.updateLoop = function() {
 			var info = {};
 			info.type = 'serverupdate';
+			info.players = this.players;
+			info.bullets = this.bullets;
 			for (var id in this.clients) {
 				this.clients[id].emit('gameinfo', info);
 			}
