@@ -256,11 +256,13 @@ utils.prototype.createPlayer = function(n,m,right,down,k)
 				if (pos[b][0]==x && pos[b][1]==y) able=0;
 			if (able)
 			{
-				pos[a]=[x+0.5,y+0.5];
+				pos[a]=[x,y];
 				break;
 			}
 		}
 	}	
+	for (var a=0;a<k;a++)
+		pos[a][0]+=0.5,pos[a][1]+=0.5;
 	return pos;
 }
 
