@@ -1,11 +1,9 @@
 var socket;
 
-var mainCanvas, context;
+var mainCanvas, mapCanvas, mainContext, mapContext;
 var tileSize;
 var downkeys = [];
 var game;
-
-var xxx;
 
 // ClientGameCore class
 // save game info for clients
@@ -28,6 +26,10 @@ var ClientGameCore = function() {
 		this.players = players;
 		// calculate tile size
 		tileSize=Math.min((mainCanvas.width - 10) / map.m, (mainCanvas.height - 10) / map.n);
+
+		clear(mapContext);
+		drawMap();
+
 		update();
 	};
 	this.onServerUpdate = function(players, bullets) {
@@ -38,7 +40,9 @@ var ClientGameCore = function() {
 
 function init() {
 	mainCanvas = document.getElementById("mainCanvas");
-	context = mainCanvas.getContext("2d");
+	mainContext = mainCanvas.getContext("2d");
+	mapCanvas = document.getElementById("mapCanvas");
+	mapContext = mapCanvas.getContext("2d");
 	socket = io();
 	socket.on('onconnected', function( data ) {
 		console.log('Connected successfully to the socket.io server. My server side ID is ' + data.id);
@@ -57,7 +61,7 @@ function init() {
 
 function start() {
 	onkeyup = onkeydown = function(event) {
-		var keyPressed = String.fromCharCode(event.keyCode);
+		var keyPressed = event.keyCode;
 		downkeys[keyPressed] = event.type == 'keydown';
 	}
 	game = new ClientGameCore();
@@ -69,18 +73,17 @@ function startScene() {
 }
 
 function update() {
-	clear();
+	clear(mainContext);
 	drawGUI();
-	drawMap();
 	handleInput();
 	updatePos();
 	drawTanks();
-	drawBullets();
+	//drawBullets();
 	requestAnimFrame(update);
 }
 
-function clear() {
-	context.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
+function clear(context) {
+	context.clearRect(0, 0, context.canvas.width, context.canvas.height);
 }
 function drawGUI() {
 }
@@ -90,54 +93,63 @@ function drawMap() {
 	var right = game.map.walls.hori;
 	var down = game.map.walls.vert;
 
-	context.lineWidth = 3;
-	context.strokestyle = "#000000";
+	mapContext.lineWidth = 3;
+	mapContext.strokestyle = "#000000";
 
 	// draw walls
 	for (var a=0;a+1<n;a++)
 		for (var b=0;b<m;b++)
-			if (down[a][b]==1) this.drawLine(context, (a+1)*tileSize,b*tileSize,(a+1)*tileSize,(b+1)*tileSize);
+			if (down[a][b]==1) this.drawLine(mapContext, (a+1)*tileSize,b*tileSize,(a+1)*tileSize,(b+1)*tileSize);
 	for (var a=0;a<n;a++)
 		for (var b=0;b+1<m;b++)
-			if (right[a][b]==1) this.drawLine(context, a*tileSize,(b+1)*tileSize,(a+1)*tileSize,(b+1)*tileSize);
+			if (right[a][b]==1) this.drawLine(mapContext, a*tileSize,(b+1)*tileSize,(a+1)*tileSize,(b+1)*tileSize);
 
 	// draw border
-	this.drawLine(context, 0, 0, n*tileSize, 0);
-	this.drawLine(context, 0, m*tileSize, n*tileSize, m*tileSize);
-	this.drawLine(context, 0, 0, 0, m*tileSize, 0);
-	this.drawLine(context, n*tileSize, 0, n*tileSize, m*tileSize);
+	this.drawLine(mapContext, 0, 0, n*tileSize, 0);
+	this.drawLine(mapContext, 0, m*tileSize, n*tileSize, m*tileSize);
+	this.drawLine(mapContext, 0, 0, 0, m*tileSize, 0);
+	this.drawLine(mapContext, n*tileSize, 0, n*tileSize, m*tileSize);
 }
 // send client operation to server
 function handleInput() {
 	var info = {};
-	if (downkeys['w'] || downkeys['up']) info.forward = true;
-	if (downkeys['s'] || downkeys['down']) info.back = true;
-	if (downkeys['a'] || downkeys['left']) info.left = true;
-	if (downkeys['d'] || downkeys['right']) info.right = true;
-	if (downkeys['space']) info.fire = true;
-	socket.emit('message', {type: 'move', move : info});
+	var flag = false;
+	if (downkeys[87] || downkeys[38]) info.forward = flag = true;
+	if (downkeys[83] || downkeys[40]) info.back = flag = true;
+	if (downkeys[65] || downkeys[37]) info.left = flag = true;
+	if (downkeys[68] || downkeys[39]) info.right = flag = true;
+	if (downkeys[32]) info.fire = flag = true;
+	if (flag) {
+		console.log(info);
+		socket.emit('message', {type: 'move', move : info});
+	}
 }
 function updatePos() {
 	// this function is reserved for client prediction and entity enterpolation
 	// which will be added in later version
 }
 function drawTanks() {
-	context.lineWidth = 1;
+	mainContext.lineWidth = 1;
+	mainContext.strokestyle = "#000000";
 	for (var id in game.players) {
 		var x = (game.players[id].pos.x + 0.5) * tileSize + 5;
 		var y = (game.players[id].pos.y + 0.5) * tileSize + 5;
+		console.log(x + ' ' + y);
 		var r = tileSize / 6;
-		context.beginPath();
-		context.arc(x, y, r, 0, Math.PI*2);
-		context.stroke();
+		var angle = game.players[id].angle;
+		mainContext.beginPath();
+		mainContext.arc(x, y, r, 0, Math.PI*2);
+		mainContext.moveTo(x, y);
+		mainContext.lineTo(x + 2 * r * Math.cos(angle), y + 2 * r * Math.sin(angle));
+		mainContext.stroke();
 	}
 }
 function drawBullets() {
 	x=game.bullets.pos.x;
 	y=game.bullets.pos.y;
-	context.moveTo(x*perWidth+perWidth+5,y*perWidth+perWidth/2+5);
-	context.arc(x*perWidth+perWidth/2+5,y*perWidth+perWidth/2+5,perWidth/2,Math.PI*2,false);
-	context.stroke();
+	mainContext.moveTo(x*perWidth+perWidth+5,y*perWidth+perWidth/2+5);
+	mainContext.arc(x*perWidth+perWidth/2+5,y*perWidth+perWidth/2+5,perWidth/2,Math.PI*2,false);
+	mainContext.stroke();
 }
 
 function drawLine(context, x1,y1,x2,y2)

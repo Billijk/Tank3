@@ -47,7 +47,7 @@
 		client.on('message', function(msg) {
 			switch (msg.type) {
 			case 'req':	request(client, msg.req); break;
-			case 'move': break;
+			case 'move': clientMove(client, msg.move); break;
 			}
 
 		});// on server received message
@@ -146,6 +146,21 @@
 					setTimeout(function() { request(client, req) }, 100);
 				}	
 				break;
+		}
+	}
+	function clientMove(client, move) {
+		var tank = games[client.gameid].players[client.userid];
+		if (tank) {
+			if (move.forward) {
+				tank.pos.x += tank.TANK_SPEED * Math.cos(tank.angle);
+				tank.pos.y += tank.TANK_SPEED * Math.sin(tank.angle);
+			}
+			if (move.back) {
+				tank.pos.x -= tank.TANK_SPEED * Math.cos(tank.angle);
+				tank.pos.y -= tank.TANK_SPEED * Math.sin(tank.angle);
+			}
+			if (move.left) tank.angle -= tank.TANK_ROTATE_SPEED;
+			if (move.right) tank.angle += tank.TANK_ROTATE_SPEED;
 		}
 	}
 

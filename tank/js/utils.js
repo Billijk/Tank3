@@ -8,7 +8,7 @@ window.requestAnimFrame = (function() {
 // player class saves player properties
 var player = function() {
 	this.BULLETS = 5;
-	this.TANK_SPEED = 2.5;
+	this.TANK_SPEED = 0.25;
 	this.TANK_ROTATE_SPEED = 0.15;
 
 	this.id;
