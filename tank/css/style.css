@@ -8,15 +8,17 @@
 	left: 0;
 }
 
-#canvas {
-	width: 50%;
-	height: 500px;
+body > div {
 	float: left;
+	width: 45%;
+}
+
+#canvas {
+	height: 500px;
+	width: 500px;
 }
 
 #userinfo {
-	float: left;
-	width: 50%;
 	list-style-type: none;
 }
 

@@ -4,8 +4,15 @@ var mainCanvas, mapCanvas, mainContext, mapContext;
 var tileSize;
 var downkeys = [];
 var fired = false;	// this ensures one shoot per click on space key
+var states = { WAIT: 1, RUN: 2 };
+var currentState = states.WAIT;
 
 var game;
+
+var time_point = 0;
+var lastTime = 0;
+var current_fps;
+var latency;
 
 // ClientGameCore class
 // save game info for clients
@@ -34,7 +41,10 @@ var ClientGameCore = function() {
 		drawMap();
 		updateGUI();
 
-		update();
+		if (currentState == states.WAIT) {
+			currentState = states.RUN;
+			update();
+		}
 	};
 	this.onServerUpdate = function(players, bullets) {
 		this.players = players;
@@ -73,11 +83,21 @@ function init() {
 							  break;
 			}
 		});
+
+		socket.on('test', function( data ) { 
+			if (!lantency) lantency = (Date.now() - data) / 2;
+			else lantency = ((Date.now() - data) / 2 + lantency) / 2;
+			if (Date.now() - time_point > 500) {
+				$('#lantency').text(lantency);
+				latency = 0;
+			}
+		});
 	});
 	start();
 }
 
 function start() {
+	time_point = Date.now();
 	onkeyup = onkeydown = function(event) {
 		var keyPressed = event.keyCode;
 		downkeys[keyPressed] = event.type == 'keydown';
@@ -91,12 +111,29 @@ function startScene() {
 }
 
 function update() {
+	getTimeInfo();
+	if (currentState != states.RUN) return;
+
 	clear(mainContext);
 	handleInput();
 	updatePos();
 	drawTanks();
 	drawBullets();
 	requestAnimFrame(update);
+}
+
+function getTimeInfo() {
+	if (lastTime) {
+		if (!current_fps) current_fps = 1000 / (Date.now() - lastTime);
+		else current_fps = (1000 / (Date.now() - lastTime) + current_fps) / 2;
+		if (Date.now() - time_point > 500) {
+			$('#fps').text(current_fps);
+			current_fps = 0;
+			time_point = Date.now();
+		}
+	}
+	lastTime = Date.now();
+	socket.emit('message', {type : 'latency_test', time : lastTime});
 }
 
 function clear(context) {
