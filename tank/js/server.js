@@ -4,7 +4,6 @@
 	var PORT = 5000;
 	var PHYSICS_LOOP_INTERVAL = 15;
 	var UPDATE_LOOP_INTERVAL = 45;
-	var WORLDSIZE = { WIDTH : 600, HEIGHT : 450 };
 
 	global.window = global.document = global;
 	require('./utils.js');
@@ -68,26 +67,40 @@
 		this.gameStatus = this.gameStatusEnum.IDLE;
 
 		this.map = {n: 0, m: 0, walls: {}};
+		this.players = [];
 
 		this.userConnect = function(client) {
 			if (!this.clients[client.userid]) {
 				this.clients[client.userid] = client;
 				this.clientCount ++;
 				client.gameid = this.id;
+
+				// add new player
+				this.players[client.userid] = new player();
+				this.players[client.userid].id= client.userid;
 			}
 		}
 		this.userDisconnect = function(client) {
 			if (this.clients[client.userid]) {
 				delete this.clients[client.userid];
+				delete this.players[client.userid];
 				this.clientCount --;
 			}
 		}
 
 		this.startNewScene = function() {
 			this.sceneCount ++;
+
+			// build map
 			this.map.n = Math.floor(Math.random() * 10 + 3);
-			this.map.m = Math.max(this.map.n + Math.floor(Math.random() * 8 - 4), 3);
+			this.map.m = Math.max(this.map.n + Math.floor(Math.random() * 8 - 4), 3); //m viberates a little around n , at least 3
 			this.map.walls = utils.prototype.createMap(this.map.n, this.map.m);
+
+			// init player info
+			for (var id in this.players) {
+				this.players[id].init();
+			}
+
 			this.physicsLoop();
 			this.updateLoop();
 		}

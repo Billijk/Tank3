@@ -5,12 +5,50 @@ window.requestAnimFrame = (function() {
 		};
 })();
 
+// player class saves player properties
+var player = function() {
+	this.BULLETS = 5;
+	this.TANK_SPEED = 2.5;
+	this.TANK_ROTATE_SPEED = 0.15;
+
+	this.id;
+	this.pos = { x:0, y:0 };
+	this.angle;
+	this.color;
+	this.score;
+	this.equipment;
+	this.restBullets;
+
+	this.init = function() {
+		this.pos.x = this.pos.y = this.angle = this.score = this.equipment = 0;
+		this.restBullets = this.BULLETS;
+	};
+};
+
+// bullet class deals with bullet properties
+var bullet = function() {
+	this.BULLET_LIFE = 15000; //milliseconds
+
+	this.id;
+	this.pos = { x:0, y:0 };
+	this.angle;
+	this.restTime;
+	this.owner;
+
+	this.init = function() {
+		this.pos.x = this.pos.y = this.angle = this.owner = 0;
+		this.restTime = this.BULLET_LIFE;
+	}
+};
+
 // utils class contains utilizations for both server and client side
 var utils = function() {};
 
 // set 'utils' global at server side for convenience
 if ('undefined' != typeof(global)) {
 	module.exports = global.utils = utils;
+	module.exports = global.player = player;
+	module.exports = global.bullet = bullet;
 }
 
 // create a n*m random map
