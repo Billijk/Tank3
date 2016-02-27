@@ -5,6 +5,8 @@ var tileSize;
 var downkeys = [];
 var game;
 
+var xxx;
+
 // ClientGameCore class
 // save game info for clients
 var ClientGameCore = function() {
@@ -59,7 +61,6 @@ function start() {
 		downkeys[keyPressed] = event.type == 'keydown';
 	}
 	game = new ClientGameCore();
-
 	startScene();
 }
 
@@ -74,6 +75,7 @@ function update() {
 	handleInput();
 	updatePos();
 	drawTanks();
+	drawBullets();
 	requestAnimFrame(update);
 }
 
@@ -129,6 +131,13 @@ function drawTanks() {
 		context.arc(x, y, r, 0, Math.PI*2);
 		context.stroke();
 	}
+}
+function drawBullets() {
+	x=game.bullets.pos.x;
+	y=game.bullets.pos.y;
+	context.moveTo(x*perWidth+perWidth+5,y*perWidth+perWidth/2+5);
+	context.arc(x*perWidth+perWidth/2+5,y*perWidth+perWidth/2+5,perWidth/2,Math.PI*2,false);
+	context.stroke();
 }
 
 function drawLine(context, x1,y1,x2,y2)

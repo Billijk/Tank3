@@ -72,6 +72,7 @@
 
 		this.map = {n: 0, m: 0, walls: {}};
 		this.players = {};
+		this.bullets = [];
 
 		this.userConnect = function(client) {
 			if (!this.clients[client.userid]) {
@@ -108,6 +109,11 @@
 				this.players[id].pos.x = positions[i][0];
 				this.players[id].pos.y = positions[i][1];
 			}
+
+			this.bullets = new bullet();
+			this.bullets.pos.x=Math.random()*this.map.n;
+			this.bullets.pos.y=Math.random()*this.map.m;
+			this.bullets.angle=Math.random()*2*Math.PI;
 
 			this.physicsLoop();
 			this.updateLoop();
