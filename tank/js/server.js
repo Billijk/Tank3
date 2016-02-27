@@ -55,6 +55,7 @@
 			switch (msg.type) {
 			case 'req':	request(client, msg.req); break;
 			case 'move': clientMove(client, msg.move); break;
+			case 'latency_test': client.emit('test', msg.time); break;
 			}
 
 		});// on server received message
@@ -133,7 +134,6 @@
 			if (this.gameStatus == this.gameStatusEnum.FINISHED) return;
 			this.sceneCount ++;
 			this.alivePlayers = this.clientCount;
-			this.gameStatus = this.gameStatusEnum.RUN;
 
 			// build map
 			this.map.n = Math.floor(Math.random() * 10 + 3);
@@ -155,8 +155,12 @@
 				delete this.bullets[i];
 			this.bullets = [];
 
-			this.physicsLoop();
-			this.updateLoop();
+			if (this.gameStatus == this.gameStatusEnum.IDLE) {
+				this.physicsLoop();
+				this.updateLoop();
+			}
+			this.gameStatus = this.gameStatusEnum.RUN;
+
 		}
 
 		this.endScene = function() {
