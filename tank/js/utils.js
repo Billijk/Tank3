@@ -34,11 +34,78 @@ var bullet = function() {
 	this.angle;
 	this.restTime;
 	this.owner;
+	this.speed = 0.05;
 
 	this.init = function() {
 		this.pos.x = this.pos.y = this.angle = this.owner = 0;
 		this.restTime = this.BULLET_LIFE;
 	}
+
+	this.next = function(n,m,right,down) {
+		vx = Math.cos(this.angle)*this.speed;
+		vy = Math.sin(this.angle)*this.speed;
+		newx = this.pos.x+vx;
+		newy = this.pos.y+vy;
+		x = Math.floor(this.pos.x);
+		y = Math.floor(this.pos.y);
+		nx = Math.floor(newx);
+		ny = Math.floor(newy);
+		if (Math.abs(x-nx)+Math.abs(y-ny)==0) this.pos={x:newx,y:newy};
+		else
+		{
+			if (Math.abs(x-nx)+Math.abs(y-ny)==1)
+			{
+				collide=0;
+				collidetime=0;
+				newangle=this.angle;
+				if (nx<0 || nx>=n || ny<0 || ny>=m)
+				{
+					if (nx<0) newangle=2*Math.PI-newangle,collidetime=this.pos.x/vx;
+					if (nx>=n) newangle=2*Math.PI-newangle,collidetime=(n-this.pos.x)/vx;
+					if (ny<0) newangle=Math.PI-newangle,collidetime=this.pos.y/vy;
+					if (ny>=m) newangle=Math.PI-newangle,collidetime=(m-this.pos.y)/vy;
+				}
+				else
+				{
+					if (Math.abs(nx-x)==1)
+					{
+						console.log(x+' '+y);
+						console.log(nx+' '+ny);
+						if ((x<nx && down[x][y]==1) || (nx<x && down[nx][ny]==1))
+						{
+							collide=1;
+							newangle=2*Math.PI-newangle;
+							if (x<nx) collidetime=(nx-this.pos.x)/vx;
+							else collidetime=(this.pos.x-x)/vx;
+						}
+					}
+					else
+					{
+						if ((y<ny && right[x][y]==1) || (ny<y && right[nx][ny]==1))
+						{
+							collide=1;
+							newangle=Math.PI-newangle;
+							if (y<ny) collidetime=(ny-this.pos.y)/vy;
+							else collidetime=(this.pos.y-y)/vy;
+						}
+					}
+				}
+				if (collide)
+				{
+					newx=this.pos.x+collidetime*vx;
+					newy=this.pos.y+collidetime*vy;
+					vx=Math.sin(newangle);
+					vy=Math.cos(newangle);
+					newx+=(1-collidetime)*vx;
+					newy+=(1-collidetime)*vy;
+				}
+				this.pos.x=newx;
+				this.pos.y=newy;
+				this.angle=newangle;
+			}
+		}
+	}
+
 };
 
 // utils class contains utilizations for both server and client side

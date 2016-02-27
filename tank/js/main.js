@@ -4,6 +4,8 @@ var mainCanvas, context;
 var downkeys = [];
 var game;
 
+var xxx;
+
 // ClientGameCore class
 // save game info for clients
 var ClientGameCore = function() {
@@ -25,6 +27,7 @@ function init() {
 			}
 		});
 	});
+	start();
 }
 
 function start() {
@@ -33,6 +36,10 @@ function start() {
 		downkeys[keyPressed] = event.type == 'keydown';
 	}
 	game = new ClientGameCore();
+	xxx = new bullet();
+	xxx.pos.x=Math.random()*game.map.n;
+	xxx.pos.y=Math.random()*game.map.m;
+	xxx.angle=Math.random()*2*Math.PI;
 	update();
 }
 
@@ -43,6 +50,7 @@ function update() {
 	handleInput();
 	updatePos();
 	drawTanks();
+	drawBullets();
 	requestAnimFrame(update);
 }
 
@@ -69,5 +77,13 @@ function updatePos() {
 	// which will be added in later version
 }
 function drawTanks() {
+}
+
+function drawBullets() {
+	x=game.bullets.pos.x;
+	y=game.bullets.pos.y;
+	context.moveTo(x*perWidth+perWidth+5,y*perWidth+perWidth/2+5);
+	context.arc(x*perWidth+perWidth/2+5,y*perWidth+perWidth/2+5,perWidth/2,Math.PI*2,false);
+	context.stroke();
 }
 
