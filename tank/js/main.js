@@ -30,7 +30,7 @@ var ClientGameCore = function() {
 		// calculate tile size
 		tileSize=Math.min((mainCanvas.width - 10) / map.m, (mainCanvas.height - 10) / map.n);
 
-		clear(mapContext);
+		mapContext.clearRect(0,0,500,500);
 		drawMap();
 		updateGUI();
 
@@ -55,6 +55,10 @@ function init() {
 		socket.on('userinfo', function( data ) {
 			if (data.newplayer) {
 				game.players[data.newplayer.id] = data.newplayer;
+				updateGUI();
+			}
+			if (data.playerleave) {
+				delete game.players[data.playerleave];
 				updateGUI();
 			}
 		});
@@ -91,7 +95,7 @@ function update() {
 	handleInput();
 	updatePos();
 	drawTanks();
-	//drawBullets();
+	drawBullets();
 	requestAnimFrame(update);
 }
 
@@ -114,21 +118,21 @@ function drawMap() {
 	var down = game.map.walls.vert;
 
 	mapContext.lineWidth = 3;
-	mapContext.strokestyle = "#000000";
+	mapContext.strokeStyle = "#000000";
 
 	// draw walls
 	for (var a=0;a+1<n;a++)
 		for (var b=0;b<m;b++)
-			if (down[a][b]==1) this.drawLine(mapContext, (a+1)*tileSize,b*tileSize,(a+1)*tileSize,(b+1)*tileSize);
+			if (down[a][b]==1) drawLine(mapContext, (a+1)*tileSize,b*tileSize,(a+1)*tileSize,(b+1)*tileSize);
 	for (var a=0;a<n;a++)
 		for (var b=0;b+1<m;b++)
-			if (right[a][b]==1) this.drawLine(mapContext, a*tileSize,(b+1)*tileSize,(a+1)*tileSize,(b+1)*tileSize);
+			if (right[a][b]==1) drawLine(mapContext, a*tileSize,(b+1)*tileSize,(a+1)*tileSize,(b+1)*tileSize);
 
 	// draw border
-	this.drawLine(mapContext, 0, 0, n*tileSize, 0);
-	this.drawLine(mapContext, 0, m*tileSize, n*tileSize, m*tileSize);
-	this.drawLine(mapContext, 0, 0, 0, m*tileSize, 0);
-	this.drawLine(mapContext, n*tileSize, 0, n*tileSize, m*tileSize);
+	drawLine(mapContext, 0, 0, n*tileSize, 0);
+	drawLine(mapContext, 0, m*tileSize, n*tileSize, m*tileSize);
+	drawLine(mapContext, 0, 0, 0, m*tileSize, 0);
+	drawLine(mapContext, n*tileSize, 0, n*tileSize, m*tileSize);
 }
 // send client operation to server
 function handleInput() {
@@ -142,7 +146,6 @@ function handleInput() {
 		if (!fired) info.fire = fired = flag = true;
 	} else fired = false;
 	if (flag) {
-		console.log(info);
 		socket.emit('message', {type: 'move', move : info});
 	}
 }
@@ -151,14 +154,15 @@ function updatePos() {
 	// which will be added in later version
 }
 function drawTanks() {
-	mainContext.lineWidth = 1;
-	mainContext.strokestyle = "#000000";
+	mainContext.lineWidth = 2;
 	for (var id in game.players) {
+		if (game.players[id].buff==-1) continue;
 		var x = (game.players[id].pos.x) * tileSize + 5;
 		var y = (game.players[id].pos.y) * tileSize + 5;
-		var r = tileSize / 6;
+		var r = tileSize * game.players[id].radius;
 		var angle = game.players[id].angle;
 		mainContext.beginPath();
+		mainContext.strokeStyle = game.players[id].color;
 		mainContext.arc(x, y, r, 0, Math.PI*2);
 		mainContext.moveTo(x, y);
 		mainContext.lineTo(x + 2 * r * Math.cos(angle), y + 2 * r * Math.sin(angle));
@@ -166,15 +170,20 @@ function drawTanks() {
 	}
 }
 function drawBullets() {
-	x=game.bullets[0].pos.x;
-	y=game.bullets[0].pos.y;
-	context.beginPath();
-	context.arc(x*tileSize+5,y*tileSize+5,tileSize/100.0,0,Math.PI*2);
-	context.stroke();
+	mainContext.strokeStyle = "black";
+	for (var i = 0; i < game.bullets.length; ++ i)
+	{
+		x=game.bullets[i].pos.x;
+		y=game.bullets[i].pos.y;
+		mainContext.beginPath();
+		mainContext.arc(x*tileSize+5,y*tileSize+5,tileSize/100.0,0,Math.PI*2);
+		mainContext.stroke();
+	}
 }
 
 function drawLine(context, x1,y1,x2,y2)
 {
+	context.beginPath();
 	context.moveTo(x1+5,y1+5);
 	context.lineTo(x2+5,y2+5);
 	context.stroke();

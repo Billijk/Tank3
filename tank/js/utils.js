@@ -8,32 +8,48 @@ window.requestAnimFrame = (function() {
 // player class saves player properties
 var player = function() {
 	this.BULLETS = 5;
-	this.TANK_SPEED = 0.025;
+	this.TANK_SPEED = 0.015;
 	this.TANK_ROTATE_SPEED = 0.05;
 
 	this.id;
 	this.name = "";
 	this.pos = { x:0, y:0 };
+	this.radius = 1.0/6;
 	this.angle;
 	this.color = utils.prototype.getRandomColor();
-	this.score;
-	this.equipment;
-	this.restBullets;
+	this.score = 0;
+	this.buff=0;
+	this.restBullets = this.BULLETS;
+	this.operation = {};
 
 	this.init = function() {
-		this.pos.x = this.pos.y = this.angle = this.score = this.equipment = 0;
+		this.pos.x = this.pos.y = this.angle = this.buff = 0;
 		this.restBullets = this.BULLETS;
 	};
 
-	// TODO: complete this function
 	this.fire = function() {
-		console.log("there should be a bullet");
+		this.restBullets--;
+		myBullet = new bullet(); 
+		myBullet.angle = this.angle;
+		myBullet.pos.x = this.pos.x+Math.cos(this.angle)/3;
+		myBullet.pos.y = this.pos.y+Math.sin(this.angle)/3;
+		myBullet.owner = this.id;
+		myBullet.restTime = myBullet.BULLET_LIFE;
+		return myBullet;
+	}
+	this.CheckGG = function(bullet) {
+		if (this.radius*this.radius>(bullet.pos.x-this.pos.x)*(bullet.pos.x-this.pos.x)+(bullet.pos.y-this.pos.y)*(bullet.pos.y-this.pos.y) && bullet.restTime>0) 
+		{
+			this.buff=-1;
+			return true;
+		}
+		return false;
 	}
 };
 
 // bullet class deals with bullet properties
 var bullet = function() {
-	this.BULLET_LIFE = 15000; //milliseconds
+	this.BULLET_LIFE = 500; //milliseconds
 
 	this.id;
 	this.pos = { x:0, y:0 };
@@ -48,6 +64,7 @@ var bullet = function() {
 	}
 
 	this.next = function(n,m,right,down) {
+		this.restTime--;
 		vx = Math.cos(this.angle)*this.speed;
 		vy = Math.sin(this.angle)*this.speed;
 		newx = this.pos.x+vx;

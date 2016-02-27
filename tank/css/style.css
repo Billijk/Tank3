@@ -2,16 +2,16 @@
 	box-sizing: border-box;
 }
 
+#canvas canvas {
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
 #canvas {
 	width: 50%;
 	height: 500px;
 	float: left;
-}
-
-#mainCanvas, #mapCanvas {
-	position: absolute;
-	top: 0;
-	left: 0;
 }
 
 #userinfo {
