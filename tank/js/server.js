@@ -45,6 +45,10 @@
 
 		// a bunch of handlers
 		client.on('message', function(msg) {
+			switch (msg.type) {
+			case 'req':	request(client, msg.req); break;
+			case 'move': break;
+			}
 
 		});// on server received message
 		client.on('disconnect', function () {
@@ -61,13 +65,13 @@
 		this.id = UUID();
 		this.sceneCount = 0;
 		this.clientCount = 0;
-		this.clients = [];
+		this.clients = {};
 
 		this.gameStatusEnum = { IDLE: 1, RUN: 2 };
 		this.gameStatus = this.gameStatusEnum.IDLE;
 
 		this.map = {n: 0, m: 0, walls: {}};
-		this.players = [];
+		this.players = {};
 
 		this.userConnect = function(client) {
 			if (!this.clients[client.userid]) {
@@ -116,7 +120,8 @@
 
 		// send info to clients
 		this.updateLoop = function() {
-			var info = undefined;
+			var info = {};
+			info.type = 'serverupdate';
 			for (var id in this.clients) {
 				this.clients[id].emit('gameinfo', info);
 			}
@@ -124,12 +129,27 @@
 		}
 	};
 
+	// deal with client requests
+	function request(client, req) {
+		switch (req.type) {
+			case 'new_scene': 
+				if (req.scene_num == games[client.gameid].sceneCount) {
+					client.emit('gameinfo', {type: 'newscene', map: games[client.gameid].map, players: games[client.gameid].players});
+				} else {
+					games[client.gameid].startNewScene();
+					setTimeout(function() { request(client, req) }, 100);
+				}	
+				break;
+		}
+	}
+
 	// return a list of games available now
 	function findGame() {
 		var availableGames = [];
 
 		return availableGames;
 	};
+
 	function createNewGame() {
 		gameCounts ++;
 		var game = new game_core();
@@ -137,12 +157,14 @@
 
 		return game.id;
 	}
+
 	function startGame(gameid) {
 		var game = games[gameid];
 		if (game) {
 			game.startNewScene();
 		}
 	}
+
 	function endGame(gameid) {
 		var game = games[gameid];
 		if (game) {
