@@ -12,9 +12,10 @@ var player = function() {
 	this.TANK_ROTATE_SPEED = 0.05;
 
 	this.id;
+	this.name = "";
 	this.pos = { x:0, y:0 };
 	this.angle;
-	this.color;
+	this.color = utils.prototype.getRandomColor();
 	this.score;
 	this.equipment;
 	this.restBullets;
@@ -128,6 +129,16 @@ if ('undefined' != typeof(global)) {
 	module.exports = global.player = player;
 	module.exports = global.bullet = bullet;
 }
+
+utils.prototype.getRandomColor = function() {
+    var letters = '0123456789ABCDEF'.split('');
+    var color = '#';
+    for (var i = 0; i < 6; i++ ) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+}
+
 
 // create a n*m random map with k players
 // represented by vertical and horizontal walls

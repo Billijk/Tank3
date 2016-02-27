@@ -22,6 +22,7 @@ var ClientGameCore = function() {
 		request.type = 'new_scene';
 		request.scene_num = this.sceneCount;
 		socket.emit('message', {type: 'req', req: request});
+		clear(mapContext);
 	};
 	this.onNewScene = function(map, players) {
 		this.map = map;
@@ -31,6 +32,7 @@ var ClientGameCore = function() {
 
 		clear(mapContext);
 		drawMap();
+		updateGUI();
 
 		update();
 	};
@@ -50,12 +52,21 @@ function init() {
 	socket.on('onconnected', function( data ) {
 		console.log('Connected successfully to the socket.io server. My server side ID is ' + data.id);
 
+		socket.on('userinfo', function( data ) {
+			if (data.newplayer) {
+				game.players[data.newplayer.id] = data.newplayer;
+				updateGUI();
+			}
+		});
+
 		socket.on('gameinfo', function( data ) {
 			switch(data.type) {
 			case 'newscene' : game.onNewScene(data.map, data.players);
 							  break;
 			case 'serverupdate' : game.onServerUpdate(data.players, data.bullets);
 								  break;
+			case 'endscene' : startScene(); 
+							  break;
 			}
 		});
 	});
@@ -77,7 +88,6 @@ function startScene() {
 
 function update() {
 	clear(mainContext);
-	drawGUI();
 	handleInput();
 	updatePos();
 	drawTanks();
@@ -88,7 +98,14 @@ function update() {
 function clear(context) {
 	context.clearRect(0, 0, context.canvas.width, context.canvas.height);
 }
-function drawGUI() {
+function updateGUI() {
+	$('#userinfo>li').remove();
+	for (var id in game.players) {
+		var color = game.players[id].color;
+		var name = game.players[id].name;
+		var score = game.players[id].score;
+		$('#userinfo').append('<li><div><span class="color" style="background-color:'+color+'"></span><span class="name">'+name+'</span><span class="score">'+score+'</span></div></li>');
+	}
 }
 function drawMap() {
 	var n = game.map.n;
