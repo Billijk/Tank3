@@ -45,6 +45,32 @@ var player = function() {
 		}
 		return false;
 	}
+
+	this.next = function(direction,n,m,right,down) {
+		availableTime=1;
+		x = Math.floor(this.pos.x);
+		y = Math.floor(this.pos.y);
+		vx = Math.cos(this.angle)*direction;
+		vy = Math.sin(this.angle)*direction;
+		if (vx<0)
+		{
+			if (x==0 || down[x-1][y]==1) availableTime=Math.min(availableTime,Math.abs((this.pos.x-this.radius-x)/vx));
+		}
+		if (vx>0)
+		{
+			if (x==n-1 || down[x][y]==1) availableTime=Math.min(availableTime,Math.abs((x+1-this.pos.x-this.radius)/vx));
+		}
+		if (vy<0)
+		{
+			if (y==0 || right[x][y-1]==1) availableTime=Math.min(availableTime,Math.abs((this.pos.y-this.radius-y)/vy));
+		}
+		if (vy>0)
+		{
+			if (y==m-1 || right[x][y]==1) availableTime=Math.min(availableTime,Math.abs((y+1-this.pos.y-this.radius)/vy));
+		}
+		this.pos.x += this.TANK_SPEED*vx*availableTime;
+		this.pos.y += this.TANK_SPEED*vy*availableTime;
+	}
 };
 
 // bullet class deals with bullet properties

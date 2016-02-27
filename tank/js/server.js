@@ -183,12 +183,10 @@
 				var tank = this.players[a];
 				if (tank.buff>=0) {
 					if (tank.operation.forward) {
-						tank.pos.x += tank.TANK_SPEED * Math.cos(tank.angle);
-						tank.pos.y += tank.TANK_SPEED * Math.sin(tank.angle);
+						tank.next(1,this.map.n,this.map.m,this.map.walls.hori,this.map.walls.vert);
 					}
 					if (tank.operation.back) {
-						tank.pos.x -= tank.TANK_SPEED * Math.cos(tank.angle);
-						tank.pos.y -= tank.TANK_SPEED * Math.sin(tank.angle);
+						tank.next(-1,this.map.n,this.map.m,this.map.walls.hori,this.map.walls.vert);
 					}
 					if (tank.operation.left) tank.angle -= tank.TANK_ROTATE_SPEED;
 					if (tank.operation.right) tank.angle += tank.TANK_ROTATE_SPEED;
