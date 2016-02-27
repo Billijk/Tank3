@@ -25,7 +25,6 @@ var player = function() {
 		this.restBullets = this.BULLETS;
 	};
 
-	// TODO: complete this function
 	this.fire = function() {
 		this.restBullets--;
 		myBullet = new bullet(); 
