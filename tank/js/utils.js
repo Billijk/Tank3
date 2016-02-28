@@ -135,14 +135,14 @@ var player = function() {
 
 // bullet class deals with bullet properties
 var bullet = function() {
-	this.BULLET_LIFE = 500; //milliseconds
+	this.BULLET_LIFE = 800; //milliseconds
 
 	this.id;
 	this.pos = { x:0, y:0 };
 	this.angle;
 	this.restTime;
 	this.owner;
-	this.speed = 0.02;
+	this.speed = 0.03;
 
 	this.init = function() {
 		this.pos.x = this.pos.y = this.angle = this.owner = 0;
