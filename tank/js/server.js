@@ -175,7 +175,7 @@
 				if (this.gameStatus == this.gameStatusEnum.IDLE) {
 					this.physicsLoop();
 					this.updateLoop();
-					this.debugLoop();
+					//this.debugLoop();
 				}
 				this.gameStatus = this.gameStatusEnum.RUN;
 

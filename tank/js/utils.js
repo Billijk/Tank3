@@ -46,51 +46,90 @@ var player = function() {
 		return false;
 	}
 
+	this.sgn = function(v) {
+		eps=1e-5;
+		if (Math.abs(v)<=eps) return 0;
+		if (v>0) return 1;
+		else return -1;
+	}
+
+	this.check = function(v){
+		if (this.sgn(v)==0) return 0;
+		else return v;
+	}
+
 	this.next = function(direction,n,m,right,down) {
+		eps=1e-5;
 		availableTime=1;
 		x = Math.floor(this.pos.x);
 		y = Math.floor(this.pos.y);
 		vx = Math.cos(this.angle)*direction*this.TANK_SPEED;
 		vy = Math.sin(this.angle)*direction*this.TANK_SPEED;
+		t1=t2=t3=t4=1;
 		if (vx<0)
 		{
-			if (x==0 || down[x-1][y]==1) availableTime=Math.min(availableTime,Math.abs((this.pos.x-this.radius-x)/vx));
+			if (x==0 || down[x-1][y]==1) 
+			{
+				t1=Math.abs((this.pos.x-this.radius-x)/vx);
+				availableTime=Math.min(availableTime,t1);
+			}
 		}
 		if (vx>0)
 		{
-			if (x==n-1 || down[x][y]==1) availableTime=Math.min(availableTime,Math.abs((x+1-this.pos.x-this.radius)/vx));
+			if (x==n-1 || down[x][y]==1) 
+			{
+				t2=Math.abs((x+1-this.pos.x-this.radius)/vx);
+				availableTime=Math.min(t2,availableTime);
+			}
 		}
 		if (vy<0)
 		{
-			if (y==0 || right[x][y-1]==1) availableTime=Math.min(availableTime,Math.abs((this.pos.y-this.radius-y)/vy));
+			if (y==0 || right[x][y-1]==1)
+			{
+				t3=Math.abs((this.pos.y-this.radius-y)/vy);
+				availableTime=Math.min(t3,availableTime);
+			}
 		}
 		if (vy>0)
 		{
-			if (y==m-1 || right[x][y]==1) availableTime=Math.min(availableTime,Math.abs((y+1-this.pos.y-this.radius)/vy));
+			if (y==m-1 || right[x][y]==1)
+			{
+				t4=Math.abs((y+1-this.pos.y-this.radius)/vy);
+				availableTime=Math.min(availableTime,t4);
+			}
 		}
 		l=0;r=1;
 		for (var a=0;a<100;a++)
 		{
-			m=(l+r)/2.0;
+			mid=(l+r)/2.0;
 			able=1;
-			newx = this.pos.x+vx*m;
-			newy = this.pos.y+vy*m;
+			newx = this.pos.x+vx*mid;
+			newy = this.pos.y+vy*mid;
 			for (var b=0;b<=1;b++)
 				for (var c=0;c<=1;c++)
 				{
 					xx = x+b;
 					yy = y+c;
-					if (xx==0 || yy==0 || xx>=n || yy>=m || down[xx-1][yy] || right[xx][yy-1])
+					if (xx==0 || yy==0 || xx>=n || yy>=m || down[xx-1][yy] || right[xx][yy-1] || down[xx-1][yy-1] || right[xx-1][yy-1])
 					{
-						if ((xx-newx)*(xx-newx)+(yy-newy)*(yy-newy)<=this.radius*this.radius) able=0;
+						if (this.sgn((xx-newx)*(xx-newx)+(yy-newy)*(yy-newy)-this.radius*this.radius)<=0) able=0;
 					}
 				}
-			if (able==0) r=m;
-			else l=m;
+			if (able==0) r=mid;
+			else l=mid;
 		}
-		r=Math.min(r,availableTime);
-		this.pos.x += vx*r;
-		this.pos.y += vy*r;
+		if (this.sgn(r-availableTime)<=0)
+		{
+			this.pos.x += this.check(vx*r);
+			this.pos.y += this.check(vy*r);
+		}
+		else
+		{
+			this.pos.x += this.check(vx*availableTime);
+			this.pos.y += this.check(vy*availableTime);
+			if (!(Math.abs(t1-availableTime)<=eps || Math.abs(t2-availableTime)<=eps)) this.pos.x += this.check(vx * (Math.min(t1,t2)-availableTime));
+			if (!(Math.abs(t3-availableTime)<=eps || Math.abs(t4-availableTime)<=eps)) this.pos.y += this.check(vy * (Math.min(t3,t4)-availableTime));
+		}
 	}
 };
 
@@ -111,6 +150,11 @@ var bullet = function() {
 	}
 
 	this.next = function(n,m,right,down) {
+		if (this.pos.x<0 || this.pos.y<0 || this.pos.x>n || this.pos.y>m)
+		{
+			this.restTime=0;
+			return;
+		}
 		this.restTime--;
 		vx = Math.cos(this.angle)*this.speed;
 		vy = Math.sin(this.angle)*this.speed;
@@ -123,7 +167,7 @@ var bullet = function() {
 		if (Math.abs(x-nx)+Math.abs(y-ny)==0) this.pos={x:newx,y:newy};
 		else
 		{
-			if (Math.abs(x-nx)+Math.abs(y-ny)>=1)
+			if (Math.abs(x-nx)+Math.abs(y-ny)==1)
 			{
 				collide=0;
 				collidetime=0;
@@ -179,6 +223,11 @@ var bullet = function() {
 					this.angle=newangle;
 				}
 			}
+			else
+			{
+				this.angle=this.angle+Math.PI;
+				if (this.angle>Math.PI*2) this.angle-=Math.PI*2;
+			}
 		}
 	}
 
@@ -195,12 +244,12 @@ if ('undefined' != typeof(global)) {
 }
 
 utils.prototype.getRandomColor = function() {
-    var letters = '0123456789ABCDEF'.split('');
-    var color = '#';
-    for (var i = 0; i < 6; i++ ) {
-        color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
+	var letters = '0123456789ABCDEF'.split('');
+	var color = '#';
+	for (var i = 0; i < 6; i++ ) {
+		color += letters[Math.floor(Math.random() * 16)];
+	}
+	return color;
 }
 
 

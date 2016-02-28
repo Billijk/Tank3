@@ -43,6 +43,13 @@ body > div {
 	margin-left: 10px;
 }
 
-#input {
+body > div > div {
 	margin-top: 10px;
+}
+
+#instructions {
+	width: 200px;
+	padding: 15px;
+	border: 1px solid black;
+	background-color: #eee;
 }
