@@ -45,6 +45,8 @@ var ClientGameCore = function() {
 			currentState = states.WAIT;
 			update();
 		}
+
+		$('#message').text('');
 	};
 	this.onServerUpdate = function(players, bullets) {
 		this.players = players;
@@ -75,12 +77,14 @@ function init() {
 
 		socket.on('gameinfo', function( data ) {
 			switch(data.type) {
+			case 'waitforuser' : $('#message').text('Wait for another user.');
+					break;
+			case 'startscene' : startScene(); 
+							  break;
 			case 'newscene' : game.onNewScene(data.map, data.players);
 							  break;
 			case 'serverupdate' : game.onServerUpdate(data.players, data.bullets);
 								  break;
-			case 'endscene' : startScene(); 
-							  break;
 			}
 		});
 

@@ -47,6 +47,11 @@ body > div > div {
 	margin-top: 10px;
 }
 
+#message {
+	color: red;
+	font-weight: bold;
+}
+
 #instructions {
 	width: 200px;
 	padding: 15px;

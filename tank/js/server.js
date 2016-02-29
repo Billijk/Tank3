@@ -25,7 +25,7 @@
 
 	// set up Express server
 	http.listen(PORT, function() {
-		console.log('Express:: Listening on port ' + PORT);
+		console.log('[INFO] Express:: Listening on port ' + PORT);
 	});
 	app.get('/', function(req, res) {
 		res.sendFile('index.html', {root: '../'});
@@ -51,8 +51,8 @@
 		games[game].userConnect(client);
 
 		client.emit('onconnected', { id: client.userid, map: games[game].map } );
-		console.log('socket.io:: player ' + client.userid + ' connected');
-		console.log('entered game ' + game);
+		console.log('[INFO] socket.io:: player ' + client.userid + ' connected');
+		console.log('[INFO] Entered game ' + game);
 
 		// a bunch of handlers
 		client.on('message', function(msg) {
@@ -80,7 +80,7 @@
 		this.playerCount = 0;
 		this.alivePlayers = 0;
 
-		this.gameStatusEnum = { IDLE: 1, RUN: 2, TOFINISH: 3, FINISHED: 4 };
+		this.gameStatusEnum = { IDLE: 1, WAIT: 2, RUN: 3, TOFINISH: 4, FINISHED: 5 };
 		this.gameStatus = this.gameStatusEnum.IDLE;
 
 		this.map = {n: 0, m: 0, walls: {}};
@@ -120,6 +120,9 @@
 
 			// if no player before, start new scene
 			if (this.gameStatus == this.gameStatusEnum.IDLE) {
+				this.gameStatus = this.gameStatusEnum.WAIT;
+				client.emit('gameinfo', { type: 'waitforuser' });
+			} else if (this.gameStatus == this.gameStatusEnum.WAIT) {
 				this.startNewScene();
 			}
 
@@ -145,6 +148,12 @@
 						this.clients[id].emit('userinfo', {playerleave: client.userid});
 					}
 				}
+				if (this.clientCount == 1) {
+					this.gameStatus = this.gameStatusEnum.WAIT;
+					for (var id in this.clients) {
+						this.clients[id].emit('gameinfo', {type: 'waitforuser'});
+					}
+				}
 				if (this.clientCount == 0) {
 					gameCounts --;
 					this.gameStatus = this.gameStatusEnum.FINISHED;
@@ -153,6 +162,8 @@
 
 			this.startNewScene = function() {
 				if (this.gameStatus == this.gameStatusEnum.FINISHED) return;
+				for (var id in this.clients)
+					this.clients[id].emit('gameinfo', {type: 'startscene'});
 				this.sceneCount ++;
 				this.alivePlayers = this.playerCount;
 
@@ -176,7 +187,8 @@
 					delete this.bullets[i];
 				this.bullets = [];
 
-				if (this.gameStatus == this.gameStatusEnum.IDLE) {
+				if (this.gameStatus == this.gameStatusEnum.WAIT) {
+					this.gameStatus = this.gameStatusEnum.RUN;
 					this.physicsLoop();
 					this.updateLoop();
 					if (debug_mode == true) this.debugLoop();
@@ -186,19 +198,16 @@
 			}
 
 			this.endScene = function() {
-				if (this.gameStatus == this.gameStatusEnum.FINISHED) return;
+				if (this.gameStatus != this.gameStatusEnum.TOFINISH && this.gameStatus != this.gameStatusEnum.RUN) return;
 				for (var id in this.players) {
 					this.players[id].score += this.players[id].buff != -1;
-				}
-				for (var id in this.clients) {
-					this.clients[id].emit('gameinfo', {type: 'endscene'});
 				}
 				this.startNewScene();
 			}
 
 			// update game logics
 			this.physicsLoop = function() {
-				if (this.gameStatus == this.gameStatusEnum.FINISHED) return;
+				if (this.gameStatus != this.gameStatusEnum.TOFINISH && this.gameStatus != this.gameStatusEnum.RUN) return;
 				if (this.alivePlayers <= 1 && this.gameStatus == this.gameStatusEnum.RUN) {
 					this.gameStatus = this.gameStatusEnum.TOFINISH;
 					setTimeout(this.endScene.bind(this), 5000);
@@ -238,7 +247,7 @@
 
 			// send info to clients
 			this.updateLoop = function() {
-				if (this.gameStatus == this.gameStatusEnum.FINISHED) return;
+				if (this.gameStatus != this.gameStatusEnum.TOFINISH && this.gameStatus != this.gameStatusEnum.RUN) return;
 				var info = {};
 				info.type = 'serverupdate';
 				info.players = this.players;
@@ -251,7 +260,8 @@
 
 			// print debug info
 			this.debugLoop = function() {
-				if (this.gameStatus == this.gameStatusEnum.FINISHED) return;
+				console.log('[DEBUG] luan che');
+				if (this.gameStatus != this.gameStatusEnum.TOFINISH && this.gameStatus != this.gameStatusEnum.RUN) return;
 				setTimeout(this.debugLoop.bind(this), UPDATE_LOOP_INTERVAL);
 			}
 		};
