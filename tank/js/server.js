@@ -8,6 +8,11 @@
 	global.window = global.document = global;
 	require('./utils.js');
 
+	// parse arguments
+	var args = process.argv.slice(2);
+	var debug_mode = args.indexOf('--debug') != -1;
+	if (debug_mode) console.log('[DEBUG] Debug mode is on.');
+
 	// server instances
 	var app = require('express')();
 	var http = require('http').Server(app);
@@ -84,7 +89,7 @@
 		this.bullets = [];
 
 		this.userConnect = function(client) {
-			console.log('user connect!');
+			console.log('[INFO] user connect! ' + client.userid);
 			if (!this.clients[client.userid]) {
 				this.clients[client.userid] = client;
 				this.clientCount ++;
@@ -96,21 +101,19 @@
 		}
 
 		this.userJoin = function(client) {
-			console.log('user join!');
+			console.log('[INFO] user join! ' + client.userid);
 			// add new player
 			this.playerCount ++;
 			this.players[client.userid] = new player();
 			this.players[client.userid].name = client.name;
 			this.players[client.userid].id = client.userid;
 			if (this.gameStatus == this.gameStatusEnum.RUN) {
-				console.log('I\'m here! RUN');
 				var positions =  utils.prototype.createPlayer(this.map.n,this.map.m,this.map.walls.hori,this.map.walls.vert,1);
 				this.players[client.userid].init();
 				this.players[client.userid].pos.x = positions[0][0];
 				this.players[client.userid].pos.y = positions[0][1];
 				this.alivePlayers ++;
 			} else if (this.gameStatus == this.gameStatusEnum.TOFINISH) {
-				console.log('I\'m here! TOFINISH');
 				this.players[client.userid].pos = { x: -100, y: -100 };
 				this.players[client.userid].buff = -1;
 			}
@@ -127,6 +130,7 @@
 		}
 
 			this.userDisconnect = function(client) {
+				console.log('[INFO] user disconnected! ' + client.userid);
 				if (this.gameStatus == this.gameStatusEnum.RUN && this.players[client.userid].buff != -1) {
 					this.alivePlayers --;
 				}
@@ -175,7 +179,7 @@
 				if (this.gameStatus == this.gameStatusEnum.IDLE) {
 					this.physicsLoop();
 					this.updateLoop();
-					//this.debugLoop();
+					if (debug_mode == true) this.debugLoop();
 				}
 				this.gameStatus = this.gameStatusEnum.RUN;
 
@@ -245,11 +249,10 @@
 				setTimeout(this.updateLoop.bind(this), UPDATE_LOOP_INTERVAL);
 			}
 
+			// print debug info
 			this.debugLoop = function() {
 				if (this.gameStatus == this.gameStatusEnum.FINISHED) return;
-				console.log(this.gameStatus);
-				console.log('alive '+this.alivePlayers+' clients '+this.clientCount);
-				setTimeout(this.debugLoop.bind(this), 5000);
+				setTimeout(this.debugLoop.bind(this), UPDATE_LOOP_INTERVAL);
 			}
 		};
 
