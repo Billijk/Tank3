@@ -25,6 +25,7 @@ var player = function() {
 	this.init = function() {
 		this.pos.x = this.pos.y = this.angle = this.buff = 0;
 		this.restBullets = this.BULLETS;
+		this.operation = {};
 	};
 
 	this.fire = function() {
