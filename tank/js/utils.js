@@ -150,6 +150,18 @@ var bullet = function() {
 		this.restTime = this.BULLET_LIFE;
 	}
 
+	this.checkRight = function(n,m,right,x,y) {
+		if (x<0 || y<0) return 0;
+		if (x>=n || y>=m) return 0;
+		return right[x][y];
+	}
+
+	this.checkDown = function(n,m,down,x,y) {
+		if (x<0 || y<0) return 0;
+		if (x>=n || y>=m) return 0;
+		return down[x][y];
+	}
+
 	this.next = function(n,m,right,down) {
 		if (this.pos.x<0 || this.pos.y<0 || this.pos.x>n || this.pos.y>m)
 		{
@@ -226,8 +238,29 @@ var bullet = function() {
 			}
 			else
 			{
-				this.angle=this.angle+Math.PI;
-				if (this.angle>Math.PI*2) this.angle-=Math.PI*2;
+				v=this.checkDown(n,m,down,x-1,y-1)*8+this.checkRight(n,m,right,x,y-1)*4+this.checkDown(n,m,down,x-1,y)*2+this.checkRight(n,m,right,x-1,y-1);
+				if (v!=0) this.restTime=0;
+				else this.pos.x=newx,this.pos.y=newy;
+				/*able=0;
+				if (newx<this.pos.x && newy<this.pos.y)
+				{
+					v=this.checkDown(x-1,y-1)*8+this.checkRight(x,y-1)*4+this.checkDown(x-1,y)*2+this.checkRight(x-1,y-1);
+					if ((v&
+				}
+				if (newx<this.pos.x && newy>this.pos.y)
+				{
+				}
+				if (newx>this.pos.x && newy<this.pos.y)
+				{
+				}
+				if (newx>this.pos.x && newy>this.pos.y)
+				{
+				}
+				if (able)
+				{
+					this.angle=this.angle+Math.PI;
+					if (this.angle>Math.PI*2) this.angle-=Math.PI*2;
+				}*/
 			}
 		}
 	}
