@@ -25,12 +25,18 @@
 		<div id="message"></div>
 		<div id="input">
 			<span>Please input your nickname first!</span><br>
-			<input id="nickname" type="text"/><button onclick="enter()">Start</button>
+			<input id="nickname" type="text" autofocus onkeydown="inputKeyDown(event)"/><button onclick="enter()">Start</button>
 		</div>
 		<div id="instructions">
 			<p>wsad/&uarr;&darr;&larr;&rarr; : move</p>
 			<p>space : fire</p>
 		</div>
 	</div>
+	<script type="text/javascript">
+		function inputKeyDown(e) {
+			// pressed enter
+			if (e.keyCode == 13) enter();
+		}
+	</script>
 </body>
 </html>
