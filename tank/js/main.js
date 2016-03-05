@@ -63,6 +63,7 @@ function init() {
 	socket = io();
 	socket.on('onconnected', function( data ) {
 		console.log('Connected successfully to the socket.io server. My server side ID is ' + data.id);
+		socket.id = data.id;
 
 		socket.on('userinfo', function( data ) {
 			if (data.newplayer) {
@@ -214,13 +215,22 @@ function drawTanks() {
 		var y = (game.players[id].pos.y) * tileSize + 5;
 		var r = tileSize * game.players[id].radius;
 		var angle = game.players[id].angle;
-		console.log(x + ' ' + y);
 		mainContext.beginPath();
 		mainContext.strokeStyle = game.players[id].color;
 		mainContext.arc(x, y, r, 0, Math.PI*2);
 		mainContext.moveTo(x, y);
 		mainContext.lineTo(x + 2 * r * Math.cos(angle), y + 2 * r * Math.sin(angle));
 		mainContext.stroke();
+		// draw a crosshair on self tank
+		if (id == socket.id) {
+			mainContext.beginPath();
+			mainContext.strokeStyle = "black";
+			mainContext.moveTo(x - r / 2, y);
+			mainContext.lineTo(x + r / 2, y);
+			mainContext.moveTo(x, y - r / 2);
+			mainContext.lineTo(x, y + r / 2);
+			mainContext.stroke();
+		}
 	}
 }
 function drawBullets() {
@@ -230,8 +240,8 @@ function drawBullets() {
 		x=game.bullets[i].pos.x;
 		y=game.bullets[i].pos.y;
 		mainContext.beginPath();
-		mainContext.arc(x*tileSize+5,y*tileSize+5,tileSize/100.0,0,Math.PI*2);
-		mainContext.stroke();
+		mainContext.arc(x*tileSize+5,y*tileSize+5,tileSize/25.0,0,Math.PI*2);
+		mainContext.fill();
 	}
 }
 

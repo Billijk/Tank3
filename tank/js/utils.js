@@ -23,8 +23,9 @@ var player = function() {
 	this.operation = {};
 
 	this.init = function() {
-		this.pos.x = this.pos.y = this.angle = this.buff = 0;
+		this.pos.x = this.pos.y = this.buff = 0;
 		this.restBullets = this.BULLETS;
+		this.angle = Math.random() * 2 * Math.PI;
 		this.operation = {};
 	};
 
