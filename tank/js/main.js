@@ -18,17 +18,14 @@ var latency;
 // ClientGameCore class
 // save game info for clients
 var ClientGameCore = function() {
-	this.sceneCount = 0;
 	this.map = {};
 	this.players = {};
 	this.bullets = [];
 
 	this.newScene = function() {
-		this.sceneCount ++;
 		this.map = {};
 		var request = {};
 		request.type = 'new_scene';
-		request.scene_num = this.sceneCount;
 		socket.emit('message', {type: 'req', req: request});
 		clear(mapContext);
 	};
@@ -170,27 +167,28 @@ function updateGUI() {
 		$('#userinfo').append('<li><div id="'+id+'"><span class="color" style="background-color:'+color+'"></span><span class="name">'+name+'</span><span class="score">'+score+'</span></div></li>');
 	}
 	// add color picker for myself
-	$('#' + socket.id + ' .color').ColorPicker({
-		color: game.players[socket.id].color,
-		onShow: function (colpkr) {
-			$(colpkr).fadeIn(500);
-			return false;
-		},
-		onHide: function (colpkr) {
-			// send info to server
-			var req = {
-				type: 'change_color',
-				color: $('#' + socket.id + ' .color').css('backgroundColor')
-			};
-			socket.emit('message', {type: 'req', req: req})
+	if (game.players[socket.id])
+		$('#' + socket.id + ' .color').ColorPicker({
+			color: game.players[socket.id].color,
+			onShow: function (colpkr) {
+				$(colpkr).fadeIn(500);
+				return false;
+			},
+			onHide: function (colpkr) {
+				// send info to server
+				var req = {
+					type: 'change_color',
+					color: $('#' + socket.id + ' .color').css('backgroundColor')
+				};
+				socket.emit('message', {type: 'req', req: req})
 
-			$(colpkr).fadeOut(500);
-			return false;
-		},
-		onChange: function (hsb, hex, rgb) {
-			$('#' + socket.id + ' .color').css('backgroundColor', '#' + hex);
-		}
-	});
+				$(colpkr).fadeOut(500);
+				return false;
+			},
+			onChange: function (hsb, hex, rgb) {
+				$('#' + socket.id + ' .color').css('backgroundColor', '#' + hex);
+			}
+		});
 }
 function drawMap() {
 	var n = game.map.n;
