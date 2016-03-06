@@ -9,7 +9,8 @@ var currentState = states.NONE;
 
 var game;
 
-var time_point = 0;
+var fps_time_point = 0;
+var latency_time_point = 0;
 var lastTime = 0;
 var current_fps;
 var latency;
@@ -17,17 +18,14 @@ var latency;
 // ClientGameCore class
 // save game info for clients
 var ClientGameCore = function() {
-	this.sceneCount = 0;
 	this.map = {};
 	this.players = {};
 	this.bullets = [];
 
 	this.newScene = function() {
-		this.sceneCount ++;
 		this.map = {};
 		var request = {};
 		request.type = 'new_scene';
-		request.scene_num = this.sceneCount;
 		socket.emit('message', {type: 'req', req: request});
 		clear(mapContext);
 	};
@@ -92,11 +90,12 @@ function init() {
 		});
 
 		socket.on('test', function( data ) { 
-			if (!lantency) lantency = (Date.now() - data) / 2;
-			else lantency = ((Date.now() - data) / 2 + lantency) / 2;
-			if (Date.now() - time_point > 500) {
-				$('#lantency').text(lantency);
+			if (!latency) latency = (Date.now() - data) / 2;
+			else latency = ((Date.now() - data) / 2 + latency) / 2;
+			if (Date.now() - latency_time_point > 500) {
+				$('#latency').text(latency.toFixed(3) + ' ms');
 				latency = 0;
+				latency_time_point = Date.now();
 			}
 		});
 	});
@@ -104,7 +103,8 @@ function init() {
 }
 
 function start() {
-	time_point = Date.now();
+	fps_time_point = Date.now();
+	latency_time_point = Date.now();
 	game = new ClientGameCore();
 	startScene();
 }
@@ -145,10 +145,10 @@ function getTimeInfo() {
 	if (lastTime) {
 		if (!current_fps) current_fps = 1000 / (Date.now() - lastTime);
 		else current_fps = (1000 / (Date.now() - lastTime) + current_fps) / 2;
-		if (Date.now() - time_point > 500) {
-			$('#fps').text(current_fps);
+		if (Date.now() - fps_time_point > 500) {
+			$('#fps').text(current_fps.toFixed(3));
 			current_fps = 0;
-			time_point = Date.now();
+			fps_time_point = Date.now();
 		}
 	}
 	lastTime = Date.now();
@@ -167,27 +167,28 @@ function updateGUI() {
 		$('#userinfo').append('<li><div id="'+id+'"><span class="color" style="background-color:'+color+'"></span><span class="name">'+name+'</span><span class="score">'+score+'</span></div></li>');
 	}
 	// add color picker for myself
-	$('#' + socket.id + ' .color').ColorPicker({
-		color: game.players[socket.id].color,
-		onShow: function (colpkr) {
-			$(colpkr).fadeIn(500);
-			return false;
-		},
-		onHide: function (colpkr) {
-			// send info to server
-			var req = {
-				type: 'change_color',
-				color: $('#' + socket.id + ' .color').css('backgroundColor')
-			};
-			socket.emit('message', {type: 'req', req: req})
+	if (game.players[socket.id])
+		$('#' + socket.id + ' .color').ColorPicker({
+			color: game.players[socket.id].color,
+			onShow: function (colpkr) {
+				$(colpkr).fadeIn(500);
+				return false;
+			},
+			onHide: function (colpkr) {
+				// send info to server
+				var req = {
+					type: 'change_color',
+					color: $('#' + socket.id + ' .color').css('backgroundColor')
+				};
+				socket.emit('message', {type: 'req', req: req})
 
-			$(colpkr).fadeOut(500);
-			return false;
-		},
-		onChange: function (hsb, hex, rgb) {
-			$('#' + socket.id + ' .color').css('backgroundColor', '#' + hex);
-		}
-	});
+				$(colpkr).fadeOut(500);
+				return false;
+			},
+			onChange: function (hsb, hex, rgb) {
+				$('#' + socket.id + ' .color').css('backgroundColor', '#' + hex);
+			}
+		});
 }
 function drawMap() {
 	var n = game.map.n;

@@ -75,7 +75,6 @@
 	var game_core = function() {
 
 		this.id = UUID();
-		this.sceneCount = 0;
 		this.clientCount = 0;
 		this.playerCount = 0;
 		this.alivePlayers = 0;
@@ -164,7 +163,7 @@
 
 			this.changeColor = function(client, col) {
 				if (this.players[client.userid]) {
-					console.log('[DEBUG] user ' + client.name + ' changed color to ' + col);
+					if (debug_mode) console.log('[DEBUG] user ' + client.name + ' changed color to ' + col);
 					this.players[client.userid].color = col;
 
 					for (var id in this.clients) {
@@ -175,9 +174,6 @@
 
 			this.startNewScene = function() {
 				if (this.gameStatus == this.gameStatusEnum.FINISHED) return;
-				for (var id in this.clients)
-					this.clients[id].emit('gameinfo', {type: 'startscene'});
-				this.sceneCount ++;
 				this.alivePlayers = this.playerCount;
 
 				// build map
@@ -208,6 +204,8 @@
 				}
 				this.gameStatus = this.gameStatusEnum.RUN;
 
+				for (var id in this.clients)
+					this.clients[id].emit('gameinfo', {type: 'startscene'});
 			}
 
 			this.endScene = function() {
@@ -282,11 +280,10 @@
 		function request(client, req) {
 			switch (req.type) {
 				case 'new_scene': 
-					if (games[client.gameid] && req.scene_num <= games[client.gameid].sceneCount) {
+					if (games[client.gameid] && 
+							games[client.gameid].gameStatus != games[client.gameid].gameStatusEnum.IDLE) {
 						client.emit('gameinfo', {type: 'newscene', map: games[client.gameid].map, players: games[client.gameid].players});
-					} else {
-						setTimeout(function() { request(client, req) }, 100);
-					}	
+					}
 					break;
 				case 'join_game':
 					client.name = req.nickname;
