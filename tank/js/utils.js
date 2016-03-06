@@ -72,7 +72,7 @@ var player = function() {
 	this.init = function() {
 		this.pos.x = this.pos.y = this.buff = 0;
 		this.restBullets = this.BULLETS;
-		this.angle = Math.PI/4;//Math.random() * 2 * Math.PI;
+		this.angle = Math.random() * 2 * Math.PI;
 		this.operation = {};
 	};
 
