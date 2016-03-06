@@ -5,10 +5,57 @@ window.requestAnimFrame = (function() {
 		};
 })();
 
+// geometry class 
+
+var geometry = function(){};
+
+geometry.prototype.eps=1e-7;
+
+geometry.prototype.sgn = function(v)
+{
+	if (Math.abs(v)<=geometry.prototype.eps) return 0;
+	if (v>0) return 1;
+	else return -1;
+}
+
+geometry.prototype.mult = function(p1,p2,p3) {
+	return (p2.x-p1.x)*(p3.y-p1.y)-(p3.x-p1.x)*(p2.y-p1.y);
+}
+
+geometry.prototype.distance = function(p1,p2){
+	return Math.sqrt((p1.x-p2.x)*(p1.x-p2.x)+(p1.y-p2.y)*(p1.y-p2.y));
+}
+
+geometry.prototype.disttoline = function(p1,p2,p3) {
+	return Math.abs((geometry.prototype.mult(p1,p2,p3))/geometry.prototype.distance(p2,p3));
+}
+
+geometry.prototype.checkCircleandSegmentSeriously = function(c,p1,p2){
+	d1=geometry.prototype.distance({x:c.x,y:c.y},p1);
+	d2=geometry.prototype.distance({x:c.x,y:c.y},p2);
+	if (geometry.prototype.sgn(d1-c.r)<=0 || geometry.prototype.sgn(d2-c.r)<=0) return 1;
+	pd={x:c.x,y:c.y};
+	pc={x:c.x,y:c.y};
+	pc.x=pc.x+p1.y-p2.y;
+	pc.y=pc.y+p2.x-p1.x;
+	return geometry.prototype.sgn(geometry.prototype.mult(p1,pd,pc)*geometry.prototype.mult(p2,pd,pc))<=0 && geometry.prototype.sgn(geometry.prototype.disttoline(pd,p1,p2)-c.r)<=0;
+}
+
+geometry.prototype.checkCircleandSegmentnotSeriously = function(c,p1,p2){
+	d1=geometry.prototype.distance({x:c.x,y:c.y},p1);
+	d2=geometry.prototype.distance({x:c.x,y:c.y},p2);
+	if (geometry.prototype.sgn(d1-c.r)<0 || geometry.prototype.sgn(d2-c.r)<0) return 1;
+	pd={x:c.x,y:c.y};
+	pc={x:c.x,y:c.y};
+	pc.x=pc.x+p1.y-p2.y;
+	pc.y=pc.y+p2.x-p1.x;
+	return geometry.prototype.sgn(geometry.prototype.mult(p1,pd,pc)*geometry.prototype.mult(p2,pd,pc))<0 && geometry.prototype.sgn(geometry.prototype.disttoline(pd,p1,p2)-c.r)<0;
+}
+
 // player class saves player properties
 var player = function() {
 	this.BULLETS = 5;
-	this.TANK_SPEED = 0.015;
+	this.TANK_SPEED = 0.015*1.5;
 	this.TANK_ROTATE_SPEED = 0.05;
 
 	this.id;
@@ -40,7 +87,7 @@ var player = function() {
 		return myBullet;
 	}
 	this.CheckGG = function(bullet) {
-		if (this.radius*this.radius>(bullet.pos.x-this.pos.x)*(bullet.pos.x-this.pos.x)+(bullet.pos.y-this.pos.y)*(bullet.pos.y-this.pos.y) && bullet.restTime>0) 
+		if ((this.radius+bullet.radius)*(this.radius+bullet.radius)>(bullet.pos.x-this.pos.x)*(bullet.pos.x-this.pos.x)+(bullet.pos.y-this.pos.y)*(bullet.pos.y-this.pos.y) && bullet.restTime>0) 
 		{
 			this.buff=-1;
 			return true;
@@ -61,77 +108,92 @@ var player = function() {
 	}
 
 	this.next = function(direction,n,m,right,down) {
-		eps=1e-5;
-		availableTime=1;
 		x = Math.floor(this.pos.x);
 		y = Math.floor(this.pos.y);
 		vx = Math.cos(this.angle)*direction*this.TANK_SPEED;
 		vy = Math.sin(this.angle)*direction*this.TANK_SPEED;
-		t1=t2=t3=t4=1;
-		if (vx<0)
-		{
-			if (x==0 || down[x-1][y]==1) 
-			{
-				t1=Math.abs((this.pos.x-this.radius-x)/vx);
-				availableTime=Math.min(availableTime,t1);
-			}
-		}
-		if (vx>0)
-		{
-			if (x==n-1 || down[x][y]==1) 
-			{
-				t2=Math.abs((x+1-this.pos.x-this.radius)/vx);
-				availableTime=Math.min(t2,availableTime);
-			}
-		}
-		if (vy<0)
-		{
-			if (y==0 || right[x][y-1]==1)
-			{
-				t3=Math.abs((this.pos.y-this.radius-y)/vy);
-				availableTime=Math.min(t3,availableTime);
-			}
-		}
-		if (vy>0)
-		{
-			if (y==m-1 || right[x][y]==1)
-			{
-				t4=Math.abs((y+1-this.pos.y-this.radius)/vy);
-				availableTime=Math.min(availableTime,t4);
-			}
-		}
 		l=0;r=1;
-		for (var a=0;a<100;a++)
+		upt=100;
+		for (var a=0;a<upt;a++)
 		{
 			mid=(l+r)/2.0;
 			able=1;
 			newx = this.pos.x+vx*mid;
 			newy = this.pos.y+vy*mid;
-			for (var b=0;b<=1;b++)
-				for (var c=0;c<=1;c++)
+			for (var b=-1;b<=1;b++)
+				for (var c=-1;c<=1;c++)
 				{
 					xx = x+b;
 					yy = y+c;
-					if (xx==0 || yy==0 || xx>=n || yy>=m || down[xx-1][yy] || right[xx][yy-1] || down[xx-1][yy-1] || right[xx-1][yy-1])
+					if (xx<0 || yy<0 || xx>=n-1 || yy>=m || down[xx][yy])
 					{
-						if (this.sgn((xx-newx)*(xx-newx)+(yy-newy)*(yy-newy)-this.radius*this.radius)<=0) able=0;
+						if (geometry.prototype.checkCircleandSegmentSeriously({x:newx,y:newy,r:this.radius},{x:xx+1,y:yy},{x:xx+1,y:yy+1})) able=0;
+					}
+					if (xx<0 || yy<0 || xx>=n || yy>=m-1 || right[xx][yy])
+					{
+						if (geometry.prototype.checkCircleandSegmentSeriously({x:newx,y:newy,r:this.radius},{x:xx,y:yy+1},{x:xx+1,y:yy+1})) able=0;
 					}
 				}
 			if (able==0) r=mid;
 			else l=mid;
 		}
-		if (this.sgn(r-availableTime)<=0)
+		this.pos.x += this.check(vx*r);
+		this.pos.y += this.check(vy*r);
+		x = Math.floor(this.pos.x);
+		y = Math.floor(this.pos.y);
+		restT=1-r;
+		l=0;r=restT;
+		for (var a=0;a<upt;a++)
 		{
-			this.pos.x += this.check(vx*r);
-			this.pos.y += this.check(vy*r);
+			mid=(l+r)/2.0;
+			able=1;
+			newx = this.pos.x+vx*mid;
+			newy = this.pos.y;
+			for (var b=-1;b<=1;b++)
+				for (var c=-1;c<=1;c++)
+				{
+					xx = x+b;
+					yy = y+c;
+					if (xx<0 || yy<0 || xx>=n-1 || yy>=m || down[xx][yy])
+					{
+						if (geometry.prototype.checkCircleandSegmentnotSeriously({x:newx,y:newy,r:this.radius},{x:xx+1,y:yy},{x:xx+1,y:yy+1})) able=0;
+					}
+					if (xx<0 || yy<0 || xx>=n || yy>=m-1 || right[xx][yy])
+					{
+						if (geometry.prototype.checkCircleandSegmentnotSeriously({x:newx,y:newy,r:this.radius},{x:xx,y:yy+1},{x:xx+1,y:yy+1})) able=0;
+					}
+				}
+			if (able==0) r=mid;
+			else l=mid;
 		}
-		else
+	   	dx = this.check(vx*r);
+		l=0;r=restT;
+		for (var a=0;a<upt;a++)
 		{
-			this.pos.x += this.check(vx*availableTime);
-			this.pos.y += this.check(vy*availableTime);
-			if (!(Math.abs(t1-availableTime)<=eps || Math.abs(t2-availableTime)<=eps)) this.pos.x += this.check(vx * (Math.min(t1,t2)-availableTime));
-			if (!(Math.abs(t3-availableTime)<=eps || Math.abs(t4-availableTime)<=eps)) this.pos.y += this.check(vy * (Math.min(t3,t4)-availableTime));
+			mid=(l+r)/2.0;
+			able=1;
+			newx = this.pos.x;
+			newy = this.pos.y+vy*mid;
+			for (var b=-1;b<=1;b++)
+				for (var c=-1;c<=1;c++)
+				{
+					xx = x+b;
+					yy = y+c;
+					if (xx<0 || yy<0 || xx>=n-1 || yy>=m || down[xx][yy])
+					{
+						if (geometry.prototype.checkCircleandSegmentnotSeriously({x:newx,y:newy,r:this.radius},{x:xx+1,y:yy},{x:xx+1,y:yy+1})) able=0;
+					}
+					if (xx<0 || yy<0 || xx>=n || yy>=m-1 || right[xx][yy])
+					{
+						if (geometry.prototype.checkCircleandSegmentnotSeriously({x:newx,y:newy,r:this.radius},{x:xx,y:yy+1},{x:xx+1,y:yy+1})) able=0;
+					}
+				}
+			if (able==0) r=mid;
+			else l=mid;
 		}
+		dy = this.check(vy*r);
+		this.pos.x += dx;
+		this.pos.y += dy;
 	}
 };
 
@@ -145,6 +207,7 @@ var bullet = function() {
 	this.restTime;
 	this.owner;
 	this.speed = 0.03;
+	this.radius=1.0/25;
 
 	this.init = function() {
 		this.pos.x = this.pos.y = this.angle = this.owner = 0;
@@ -243,25 +306,25 @@ var bullet = function() {
 				if (v!=0) this.restTime=0;
 				else this.pos.x=newx,this.pos.y=newy;
 				/*able=0;
-				if (newx<this.pos.x && newy<this.pos.y)
-				{
-					v=this.checkDown(x-1,y-1)*8+this.checkRight(x,y-1)*4+this.checkDown(x-1,y)*2+this.checkRight(x-1,y-1);
-					if ((v&
-				}
-				if (newx<this.pos.x && newy>this.pos.y)
-				{
-				}
-				if (newx>this.pos.x && newy<this.pos.y)
-				{
-				}
-				if (newx>this.pos.x && newy>this.pos.y)
-				{
-				}
-				if (able)
-				{
-					this.angle=this.angle+Math.PI;
-					if (this.angle>Math.PI*2) this.angle-=Math.PI*2;
-				}*/
+				  if (newx<this.pos.x && newy<this.pos.y)
+				  {
+				  v=this.checkDown(x-1,y-1)*8+this.checkRight(x,y-1)*4+this.checkDown(x-1,y)*2+this.checkRight(x-1,y-1);
+				  if ((v&
+				  }
+				  if (newx<this.pos.x && newy>this.pos.y)
+				  {
+				  }
+				  if (newx>this.pos.x && newy<this.pos.y)
+				  {
+				  }
+				  if (newx>this.pos.x && newy>this.pos.y)
+				  {
+				  }
+				  if (able)
+				  {
+				  this.angle=this.angle+Math.PI;
+				  if (this.angle>Math.PI*2) this.angle-=Math.PI*2;
+				  }*/
 			}
 		}
 	}
