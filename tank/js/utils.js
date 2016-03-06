@@ -1,8 +1,8 @@
 window.requestAnimFrame = (function() {
 	return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
-		function( /* function FrameRequestCallback */ callback, /* DOMElement Element */ element) {
-			return window.setTimeout(callback, 1000 / 60);
-		};
+	function( /* function FrameRequestCallback */ callback, /* DOMElement Element */ element) {
+		return window.setTimeout(callback, 1000 / 60);
+	};
 })();
 
 // geometry class 
@@ -72,7 +72,7 @@ var player = function() {
 	this.init = function() {
 		this.pos.x = this.pos.y = this.buff = 0;
 		this.restBullets = this.BULLETS;
-		this.angle = Math.random() * 2 * Math.PI;
+		this.angle = Math.PI/4;//Math.random() * 2 * Math.PI;
 		this.operation = {};
 	};
 
@@ -166,7 +166,7 @@ var player = function() {
 			if (able==0) r=mid;
 			else l=mid;
 		}
-	   	dx = this.check(vx*r);
+		dx = this.check(vx*r);
 		l=0;r=restT;
 		for (var a=0;a<upt;a++)
 		{
@@ -235,96 +235,95 @@ var bullet = function() {
 		this.restTime--;
 		vx = Math.cos(this.angle)*this.speed;
 		vy = Math.sin(this.angle)*this.speed;
-		newx = this.pos.x+vx;
-		newy = this.pos.y+vy;
 		x = Math.floor(this.pos.x);
 		y = Math.floor(this.pos.y);
-		nx = Math.floor(newx);
-		ny = Math.floor(newy);
-		if (Math.abs(x-nx)+Math.abs(y-ny)==0) this.pos={x:newx,y:newy};
+		l=0;r=1;
+		upt=100;
+		collide=0;
+		for (var a=0;a<upt;a++)
+		{
+			mid=(l+r)/2.0;
+			able=1;
+			newx = this.pos.x+vx*mid;
+			newy = this.pos.y+vy*mid;
+			for (var b=-1;b<=1;b++)
+				for (var c=-1;c<=1;c++)
+				{
+					xx = x+b;
+					yy = y+c;
+					if (xx<0 || yy<0 || xx>=n-1 || yy>=m || down[xx][yy])
+					{
+						if (geometry.prototype.checkCircleandSegmentSeriously({x:newx,y:newy,r:this.radius},{x:xx+1,y:yy},{x:xx+1,y:yy+1})) able=0,collide=1;
+					}
+					if (xx<0 || yy<0 || xx>=n || yy>=m-1 || right[xx][yy])
+					{
+						if (geometry.prototype.checkCircleandSegmentSeriously({x:newx,y:newy,r:this.radius},{x:xx,y:yy+1},{x:xx+1,y:yy+1})) able=0,collide=2;
+					}
+				}
+			if (able==0) r=mid;
+			else l=mid;
+		}
+		if (collide==0)
+		{
+			this.pos.x += vx;
+			this.pos.y += vy;
+		}
 		else
 		{
-			if (Math.abs(x-nx)+Math.abs(y-ny)==1)
+			newangle = this.angle;
+			this.pos.x += r*vx;
+			this.pos.y += r*vy;
+			if (collide==1) newangle = Math.PI-newangle;
+			else newangle = 2*Math.PI-newangle;
+			vx = Math.cos(newangle)*this.speed;
+			vy = Math.sin(newangle)*this.speed;
+			x = Math.floor(this.pos.x);
+			y = Math.floor(this.pos.y);
+			l=0;r=1-r;
+			newcollide=collide;
+			collide=0;
+			for (var a=0;a<upt;a++)
 			{
-				collide=0;
-				collidetime=0;
-				newangle=this.angle;
-				if (nx<0 || nx>=n || ny<0 || ny>=m)
-				{
-					collide=1;
-					if (nx<0) newangle=Math.PI-newangle,collidetime=this.pos.x/vx;
-					if (nx>=n) newangle=Math.PI-newangle,collidetime=(n-this.pos.x)/vx;
-					if (ny<0) newangle=2*Math.PI-newangle,collidetime=this.pos.y/vy;
-					if (ny>=m) newangle=2*Math.PI-newangle,collidetime=(m-this.pos.y)/vy;
-				}
-				else
-				{
-					if (Math.abs(nx-x)==1)
+				mid=(l+r)/2.0;
+				able=1;
+				newx = this.pos.x+vx*mid;
+				newy = this.pos.y+vy*mid;
+				for (var b=-1;b<=1;b++)
+					for (var c=-1;c<=1;c++)
 					{
-						if ((x<nx && down[x][y]==1) || (nx<x && down[nx][ny]==1))
+						xx = x+b;
+						yy = y+c;
+						if (xx<0 || yy<0 || xx>=n-1 || yy>=m || down[xx][yy])
 						{
-							collide=1;
-							newangle=Math.PI-newangle;
-							if (x<nx) collidetime=(nx-this.pos.x)/vx;
-							else collidetime=(this.pos.x-x)/vx;
+							if (geometry.prototype.checkCircleandSegmentnotSeriously({x:newx,y:newy,r:this.radius},{x:xx+1,y:yy},{x:xx+1,y:yy+1})) able=0,collide=1;
+						}
+						if (xx<0 || yy<0 || xx>=n || yy>=m-1 || right[xx][yy])
+						{
+							if (geometry.prototype.checkCircleandSegmentnotSeriously({x:newx,y:newy,r:this.radius},{x:xx,y:yy+1},{x:xx+1,y:yy+1})) able=0,collide=1;
 						}
 					}
-					else
-					{
-						if ((y<ny && right[x][y]==1) || (ny<y && right[nx][ny]==1))
-						{
-							collide=1;
-							newangle=2*Math.PI-newangle;
-							if (y<ny) collidetime=(ny-this.pos.y)/vy;
-							else collidetime=(this.pos.y-y)/vy;
-						}
-					}
-				}
-				collidetime=Math.abs(collidetime);
-				if (collide==1)
-				{
-					newx=this.pos.x+collidetime*vx;
-					newy=this.pos.y+collidetime*vy;
-					vx=Math.cos(newangle)*this.speed;
-					vy=Math.sin(newangle)*this.speed;
-					newx+=(1-collidetime)*vx;
-					newy+=(1-collidetime)*vy;
-					this.pos.x=newx;
-					this.pos.y=newy;
-					this.angle=newangle;
-				}
-				else
-				{
-					this.pos.x=newx;
-					this.pos.y=newy;
-					this.angle=newangle;
-				}
+				if (able==0) r=mid;
+				else l=mid;
+			}
+			if (collide==1)
+			{
+				this.pos.x += r*vx;
+				this.pos.y += r*vy;
+				collide=3-newcollide;
+				if (collide==1) newangle = Math.PI-newangle;
+				else newangle = 2*Math.PI-newangle;
+				vx = Math.cos(newangle)*this.speed;
+				vy = Math.sin(newangle)*this.speed;
+				r=1-r;
+				this.pos.x += r*vx;
+				this.pos.y += r*vy;
+				this.angle = newangle;
 			}
 			else
 			{
-				v=this.checkDown(n,m,down,x-1,y-1)*8+this.checkRight(n,m,right,x,y-1)*4+this.checkDown(n,m,down,x-1,y)*2+this.checkRight(n,m,right,x-1,y-1);
-				if (v!=0) this.restTime=0;
-				else this.pos.x=newx,this.pos.y=newy;
-				/*able=0;
-				  if (newx<this.pos.x && newy<this.pos.y)
-				  {
-				  v=this.checkDown(x-1,y-1)*8+this.checkRight(x,y-1)*4+this.checkDown(x-1,y)*2+this.checkRight(x-1,y-1);
-				  if ((v&
-				  }
-				  if (newx<this.pos.x && newy>this.pos.y)
-				  {
-				  }
-				  if (newx>this.pos.x && newy<this.pos.y)
-				  {
-				  }
-				  if (newx>this.pos.x && newy>this.pos.y)
-				  {
-				  }
-				  if (able)
-				  {
-				  this.angle=this.angle+Math.PI;
-				  if (this.angle>Math.PI*2) this.angle-=Math.PI*2;
-				  }*/
+				this.pos.x += vx*r;
+				this.pos.y += vy*r;
+				this.angle = newangle;
 			}
 		}
 	}
