@@ -263,8 +263,9 @@ function drawBullets() {
 	{
 		x=game.bullets[i].pos.x;
 		y=game.bullets[i].pos.y;
+		r=game.bullets[i].radius;
 		mainContext.beginPath();
-		mainContext.arc(x*tileSize+5,y*tileSize+5,tileSize/25.0,0,Math.PI*2);
+		mainContext.arc(x*tileSize+5,y*tileSize+5,tileSize*r,0,Math.PI*2);
 		mainContext.fill();
 	}
 }
