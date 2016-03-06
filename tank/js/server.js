@@ -134,7 +134,9 @@
 
 			this.userDisconnect = function(client) {
 				console.log('[INFO] user disconnected! ' + client.userid);
-				if (this.gameStatus == this.gameStatusEnum.RUN && this.players[client.userid].buff != -1) {
+				if (this.gameStatus == this.gameStatusEnum.RUN &&
+						this.players[client.userid] &&
+						this.players[client.userid].buff != -1) {
 					this.alivePlayers --;
 				}
 				if (this.players[client.userid]) this.playerCount --;
