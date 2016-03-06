@@ -69,9 +69,11 @@ function init() {
 			if (data.newplayer) {
 				game.players[data.newplayer.id] = data.newplayer;
 				updateGUI();
-			}
-			if (data.playerleave) {
+			} else if (data.playerleave) {
 				delete game.players[data.playerleave];
+				updateGUI();
+			} else if (data.newcolor) {
+				game.players[data.newcolor.player].color = data.newcolor.color;
 				updateGUI();
 			}
 		});
@@ -162,8 +164,30 @@ function updateGUI() {
 		var color = game.players[id].color;
 		var name = game.players[id].name;
 		var score = game.players[id].score;
-		$('#userinfo').append('<li><div><span class="color" style="background-color:'+color+'"></span><span class="name">'+name+'</span><span class="score">'+score+'</span></div></li>');
+		$('#userinfo').append('<li><div id="'+id+'"><span class="color" style="background-color:'+color+'"></span><span class="name">'+name+'</span><span class="score">'+score+'</span></div></li>');
 	}
+	// add color picker for myself
+	$('#' + socket.id + ' .color').ColorPicker({
+		color: game.players[socket.id].color,
+		onShow: function (colpkr) {
+			$(colpkr).fadeIn(500);
+			return false;
+		},
+		onHide: function (colpkr) {
+			// send info to server
+			var req = {
+				type: 'change_color',
+				color: $('#' + socket.id + ' .color').css('backgroundColor')
+			};
+			socket.emit('message', {type: 'req', req: req})
+
+			$(colpkr).fadeOut(500);
+			return false;
+		},
+		onChange: function (hsb, hex, rgb) {
+			$('#' + socket.id + ' .color').css('backgroundColor', '#' + hex);
+		}
+	});
 }
 function drawMap() {
 	var n = game.map.n;

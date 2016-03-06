@@ -160,6 +160,17 @@
 				}
 			}
 
+			this.changeColor = function(client, col) {
+				if (this.players[client.userid]) {
+					console.log('[DEBUG] user ' + client.name + ' changed color to ' + col);
+					this.players[client.userid].color = col;
+
+					for (var id in this.clients) {
+						this.clients[id].emit('userinfo', {newcolor: {player: client.userid, color: col}});
+					}
+				}
+			}
+
 			this.startNewScene = function() {
 				if (this.gameStatus == this.gameStatusEnum.FINISHED) return;
 				for (var id in this.clients)
@@ -260,7 +271,6 @@
 
 			// print debug info
 			this.debugLoop = function() {
-				console.log('[DEBUG] luan che');
 				if (this.gameStatus != this.gameStatusEnum.TOFINISH && this.gameStatus != this.gameStatusEnum.RUN) return;
 				setTimeout(this.debugLoop.bind(this), UPDATE_LOOP_INTERVAL);
 			}
@@ -279,6 +289,9 @@
 				case 'join_game':
 					client.name = req.nickname;
 					games[client.gameid].userJoin(client);
+					break;
+				case 'change_color':
+					games[client.gameid].changeColor(client, req.color);
 					break;
 			}
 		}

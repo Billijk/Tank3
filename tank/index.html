@@ -5,10 +5,12 @@
 	<title>Tank Dongdang! 3</title>
 	<script type="text/javascript" src="/socket.io/socket.io.js"></script>
 	<script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+	<script type="text/javascript" src="js/colorpicker.js"></script>
 	<script type="text/javascript" src="js/utils.js"></script>
 	<script type="text/javascript" src="js/main.js"></script>
 
 	<link rel="stylesheet" href="css/style.css">
+	<link rel="stylesheet" href="css/colorpicker.css" />
 </head>
 
 <body onload="init()">
@@ -20,14 +22,14 @@
 
 	<div>
 		<ul id="userinfo"></ul>
-		<div>fps:<span id="fps"></span></div>
-		<div>lantency:<span id="lantency"></span></div>
-		<div id="message"></div>
-		<div id="input">
+		<div class="messageUI">fps:<span id="fps"></span></div>
+		<div class="messageUI">lantency:<span id="lantency"></span></div>
+		<div class="messageUI" id="message"></div>
+		<div class="messageUI" id="input">
 			<span>Please input your nickname first!</span><br>
 			<input id="nickname" type="text" autofocus onkeydown="inputKeyDown(event)"/><button onclick="enter()">Start</button>
 		</div>
-		<div id="instructions">
+		<div class="messageUI" id="instructions">
 			<p>wsad/&uarr;&darr;&larr;&rarr; : move</p>
 			<p>space : fire</p>
 		</div>
