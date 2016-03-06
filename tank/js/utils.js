@@ -214,18 +214,6 @@ var bullet = function() {
 		this.restTime = this.BULLET_LIFE;
 	}
 
-	this.checkRight = function(n,m,right,x,y) {
-		if (x<0 || y<0) return 0;
-		if (x>=n || y>=m) return 0;
-		return right[x][y];
-	}
-
-	this.checkDown = function(n,m,down,x,y) {
-		if (x<0 || y<0) return 0;
-		if (x>=n || y>=m) return 0;
-		return down[x][y];
-	}
-
 	this.next = function(n,m,right,down) {
 		if (this.pos.x<0 || this.pos.y<0 || this.pos.x>n || this.pos.y>m)
 		{
