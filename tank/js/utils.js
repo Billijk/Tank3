@@ -217,13 +217,13 @@ var bullet = function() {
 	this.checkRight = function(n,m,right,x,y) {
 		if (x<0 || y<0) return 0;
 		if (x>=n || y>=m) return 0;
-		return right[x][y];
+		return y==m-1 || right[x][y];
 	}
 
 	this.checkDown = function(n,m,down,x,y) {
 		if (x<0 || y<0) return 0;
 		if (x>=n || y>=m) return 0;
-		return down[x][y];
+		return x==n-1 || down[x][y];
 	}
 
 	this.next = function(n,m,right,down) {
@@ -237,6 +237,26 @@ var bullet = function() {
 		vy = Math.sin(this.angle)*this.speed;
 		x = Math.floor(this.pos.x);
 		y = Math.floor(this.pos.y);
+		if (this.checkRight(n,m,right,x,y) && geometry.prototype.checkCircleandSegmentnotSeriously({x:this.pos.x,y:this.pos.y,r:this.radius},{x:x,y:y+1},{x:x+1,y:y+1}))
+		{
+			this.restTime=0;
+			return;
+		}
+		if (this.checkDown(n,m,down,x,y) && geometry.prototype.checkCircleandSegmentnotSeriously({x:this.pos.x,y:this.pos.y,r:this.radius},{x:x+1,y:y},{x:x+1,y:y+1}))
+		{
+			this.restTime=0;
+			return;
+		}
+		if (this.checkRight(n,m,right,x,y-1) && geometry.prototype.checkCircleandSegmentnotSeriously({x:this.pos.x,y:this.pos.y,r:this.radius},{x:x,y:y},{x:x+1,y:y}))
+		{
+			this.restTime=0;
+			return;
+		}
+		if (this.checkDown(n,m,down,x-1,y) && geometry.prototype.checkCircleandSegmentnotSeriously({x:this.pos.x,y:this.pos.y,r:this.radius},{x:x,y:y},{x:x,y:y+1}))
+		{
+			this.restTime=0;
+			return;
+		}
 		l=0;r=1;
 		upt=100;
 		collide=0;
