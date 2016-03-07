@@ -57,11 +57,12 @@ var player = function() {
 	this.BULLETS = 5;
 	this.TANK_SPEED = 0.015*1.5;
 	this.TANK_ROTATE_SPEED = 0.05;
+	this.TANK_RADIUS = 1.0/6;
 
 	this.id;
 	this.name = "";
 	this.pos = { x:0, y:0 };
-	this.radius = 1.0/6;
+	this.radius = this.TANK_RADIUS;
 	this.angle;
 	this.color = utils.prototype.getRandomColor();
 	this.score = 0;
@@ -73,6 +74,7 @@ var player = function() {
 		this.pos.x = this.pos.y = this.buff = 0;
 		this.restBullets = this.BULLETS;
 		this.angle = Math.random() * 2 * Math.PI;
+		this.radius = this.TANK_RADIUS;
 		this.operation = {};
 	};
 
@@ -349,6 +351,13 @@ var bullet = function() {
 	}
 
 };
+
+var equipment = function() {
+
+	this.EquipementTypeNumber = 1;
+	this.pos = {x:0,y:0};
+	this.type = Math.floor(Math.random()*(this.EquipementType-1))+1;
+}
 
 // utils class contains utilizations for both server and client side
 var utils = function() {};

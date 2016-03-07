@@ -132,6 +132,7 @@ function update() {
 	clear(mainContext);
 	drawTanks();
 	drawBullets();
+	drawEuipments();
 
 	if (currentState != states.RUN) {
 		handleInput();
@@ -269,6 +270,9 @@ function drawBullets() {
 		mainContext.arc(x*tileSize+5,y*tileSize+5,tileSize*r,0,Math.PI*2);
 		mainContext.fill();
 	}
+}
+
+function drawEuipments() {
 }
 
 function drawLine(context, x1,y1,x2,y2)
