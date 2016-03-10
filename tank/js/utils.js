@@ -18,8 +18,6 @@ var utils = function() {};
 // set 'utils' global at server side for convenience
 if ('undefined' != typeof(global)) {
 	module.exports = global.utils = utils;
-	module.exports = global.player = player;
-	module.exports = global.bullet = bullet;
 }
 
 utils.prototype.getRandomColor = function() {
