@@ -6,6 +6,9 @@
 	var UPDATE_LOOP_INTERVAL = 45;
 
 	global.window = global.document = global;
+	require('./bullet.js');
+	require('./player.js');
+	require('./geometry.js');
 	require('./utils.js');
 
 	// parse arguments
