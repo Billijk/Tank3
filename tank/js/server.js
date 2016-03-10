@@ -251,7 +251,10 @@
 				help=[];
 				for (var i = 0; i < this.bullets.length; i++)
 					if (this.bullets[i].restTime!=0) help.push(this.bullets[i]);
-					else this.players[this.bullets[i].owner].restBullets++;
+					else
+					{	
+						if (this.bullets[i].owner!=-1) this.players[this.bullets[i].owner].restBullets++;
+					}
 				this.bullets=help;
 				setTimeout(this.physicsLoop.bind(this), PHYSICS_LOOP_INTERVAL);
 			}

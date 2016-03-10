@@ -106,6 +106,34 @@ var player = function() {
 				bullets[a].radius*=2;
 			this.buff=0;
 		}
+		if (this.buff==3)
+		{
+			for (var a=0;a<5;a++)
+			{
+				var myBullet = new bullet(); 
+				myBullet.angle = this.angle;
+				myBullet.pos.x = this.pos.x+Math.cos(this.angle)*(1.0/3+0.08*a);
+				myBullet.pos.y = this.pos.y+Math.sin(this.angle)*(1.0/3+0.08*a);
+				myBullet.restTime = myBullet.BULLET_LIFE;
+				myBullet.owner = -1;
+				bullets.push(myBullet);
+			}
+			this.buff=0;
+		}
+		if (this.buff==4)
+		{
+			for (var a=0;a<8;a++)
+			{
+				var myBullet = new bullet(); 
+				myBullet.angle = this.angle+Math.PI/4*a;
+				myBullet.pos.x = this.pos.x+Math.cos(this.angle+Math.PI/4*a)*(1.0/3);
+				myBullet.pos.y = this.pos.y+Math.sin(this.angle+Math.PI/4*a)*(1.0/3);
+				myBullet.restTime = myBullet.BULLET_LIFE;
+				myBullet.owner = -1;
+				bullets.push(myBullet);
+			}
+			this.buff=0;
+		}
 	}
 	this.CheckGG = function(bullet) {
 		if ((this.radius+bullet.radius)*(this.radius+bullet.radius)>(bullet.pos.x-this.pos.x)*(bullet.pos.x-this.pos.x)+(bullet.pos.y-this.pos.y)*(bullet.pos.y-this.pos.y) && bullet.restTime>0) 
