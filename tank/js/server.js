@@ -236,7 +236,7 @@
 						}
 						if (tank.operation.left) tank.angle -= tank.TANK_ROTATE_SPEED;
 						if (tank.operation.right) tank.angle += tank.TANK_ROTATE_SPEED;
-						if (tank.operation.fire && tank.restBullets>0) this.bullets.push(tank.fire());
+						if (tank.operation.fire) tank.fire(this.bullets);
 						tank.operation = {};
 						for (var b=0;b<this.bullets.length;b++)
 						{

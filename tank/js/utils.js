@@ -78,15 +78,34 @@ var player = function() {
 		this.operation = {};
 	};
 
-	this.fire = function() {
-		this.restBullets--;
-		myBullet = new bullet(); 
-		myBullet.angle = this.angle;
-		myBullet.pos.x = this.pos.x+Math.cos(this.angle)/3;
-		myBullet.pos.y = this.pos.y+Math.sin(this.angle)/3;
-		myBullet.owner = this.id;
-		myBullet.restTime = myBullet.BULLET_LIFE;
-		return myBullet;
+	this.fire = function(bullets) {
+		if (this.buff==-1) return;
+		if (this.buff==0)
+		{
+			if (this.restBullets>0)
+			{
+				this.restBullets--;
+				myBullet = new bullet(); 
+				myBullet.angle = this.angle;
+				myBullet.pos.x = this.pos.x+Math.cos(this.angle)/3;
+				myBullet.pos.y = this.pos.y+Math.sin(this.angle)/3;
+				myBullet.owner = this.id;
+				myBullet.restTime = myBullet.BULLET_LIFE;
+				bullets.push(myBullet);
+			}
+		}
+		if (this.buff==1)
+		{
+			for (var a=0;a<bullets.length;a++)
+				bullets[a].angle=Math.random()*2*Math.PI;
+			this.buff=0;
+		}
+		if (this.buff==2)
+		{
+			for (var a=0;a<bullets.length;a++)
+				bullets[a].radius*=2;
+			this.buff=0;
+		}
 	}
 	this.CheckGG = function(bullet) {
 		if ((this.radius+bullet.radius)*(this.radius+bullet.radius)>(bullet.pos.x-this.pos.x)*(bullet.pos.x-this.pos.x)+(bullet.pos.y-this.pos.y)*(bullet.pos.y-this.pos.y) && bullet.restTime>0) 
