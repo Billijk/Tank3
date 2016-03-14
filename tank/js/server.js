@@ -6,6 +6,9 @@
 	var UPDATE_LOOP_INTERVAL = 45;
 
 	global.window = global.document = global;
+	require('./bullet.js');
+	require('./player.js');
+	require('./geometry.js');
 	require('./utils.js');
 
 	// parse arguments
@@ -233,10 +236,11 @@
 						}
 						if (tank.operation.back) {
 							tank.next(-1,this.map.n,this.map.m,this.map.walls.hori,this.map.walls.vert);
+							tank.buff=Math.floor(Math.random()*4+1);
 						}
 						if (tank.operation.left) tank.angle -= tank.TANK_ROTATE_SPEED;
 						if (tank.operation.right) tank.angle += tank.TANK_ROTATE_SPEED;
-						if (tank.operation.fire && tank.restBullets>0) this.bullets.push(tank.fire());
+						if (tank.operation.fire) tank.fire(this.bullets);
 						tank.operation = {};
 						for (var b=0;b<this.bullets.length;b++)
 						{
@@ -251,7 +255,10 @@
 				help=[];
 				for (var i = 0; i < this.bullets.length; i++)
 					if (this.bullets[i].restTime!=0) help.push(this.bullets[i]);
-					else this.players[this.bullets[i].owner].restBullets++;
+					else
+					{	
+						if (this.bullets[i].owner!=-1) this.players[this.bullets[i].owner].restBullets++;
+					}
 				this.bullets=help;
 				setTimeout(this.physicsLoop.bind(this), PHYSICS_LOOP_INTERVAL);
 			}
