@@ -236,6 +236,7 @@
 						}
 						if (tank.operation.back) {
 							tank.next(-1,this.map.n,this.map.m,this.map.walls.hori,this.map.walls.vert);
+							tank.buff=Math.floor(Math.random()*4+1);
 						}
 						if (tank.operation.left) tank.angle -= tank.TANK_ROTATE_SPEED;
 						if (tank.operation.right) tank.angle += tank.TANK_ROTATE_SPEED;
