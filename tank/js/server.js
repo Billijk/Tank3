@@ -236,7 +236,6 @@
 						}
 						if (tank.operation.back) {
 							tank.next(-1,this.map.n,this.map.m,this.map.walls.hori,this.map.walls.vert);
-							tank.buff=Math.floor(Math.random()*4+1);
 						}
 						if (tank.operation.left) tank.angle -= tank.TANK_ROTATE_SPEED;
 						if (tank.operation.right) tank.angle += tank.TANK_ROTATE_SPEED;
@@ -257,7 +256,7 @@
 					if (this.bullets[i].restTime!=0) help.push(this.bullets[i]);
 					else
 					{	
-						if (this.bullets[i].owner!=-1) this.players[this.bullets[i].owner].restBullets++;
+						if (this.bullets[i].owner!=-1 && this.players[bullets[i].owner]) this.players[this.bullets[i].owner].restBullets++;
 					}
 				this.bullets=help;
 				setTimeout(this.physicsLoop.bind(this), PHYSICS_LOOP_INTERVAL);
