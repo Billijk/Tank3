@@ -8,6 +8,7 @@
 	global.window = global.document = global;
 	require('./bullet.js');
 	require('./player.js');
+	require('./equipment.js');
 	require('./geometry.js');
 	require('./utils.js');
 
@@ -249,6 +250,9 @@
 								this.alivePlayers --;
 							}
 						}
+					}
+					if (tank.buff==0)
+					{
 					}
 				}
 				help=[];
