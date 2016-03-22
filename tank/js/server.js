@@ -4,6 +4,7 @@
 	var PORT = 5000;
 	var PHYSICS_LOOP_INTERVAL = 15;
 	var UPDATE_LOOP_INTERVAL = 45;
+	var EQUIPMENT_GENERATE_PROB = 0.001;
 
 	global.window = global.document = global;
 	require('./bullet.js');
@@ -90,6 +91,7 @@
 		this.clients = {};
 		this.players = {};
 		this.bullets = [];
+		this.equipments = [];
 
 		this.userConnect = function(client) {
 			console.log('[INFO] user connect! ' + client.userid);
@@ -195,10 +197,15 @@
 					i ++;
 				}
 
-				//init bullet info
-				for (var i = 0; i < this.bullets.length; ++ i)
+				// init bullet info
+				for (var i in this.bullets)
 					delete this.bullets[i];
 				this.bullets = [];
+
+				// init equipment info
+				for (var i in this.equipments)
+					delete this.equipments[i];
+				this.equipments = [];
 
 				if (this.gameStatus == this.gameStatusEnum.WAIT) {
 					this.gameStatus = this.gameStatusEnum.RUN;
@@ -223,15 +230,32 @@
 			// update game logics
 			this.physicsLoop = function() {
 				if (this.gameStatus != this.gameStatusEnum.TOFINISH && this.gameStatus != this.gameStatusEnum.RUN) return;
+				
+				// check game over
 				if (this.alivePlayers <= 1 && this.gameStatus == this.gameStatusEnum.RUN) {
 					this.gameStatus = this.gameStatusEnum.TOFINISH;
 					setTimeout(this.endScene.bind(this), 5000);
 				}
+
+				// generate equipment
+				if (Math.random() < EQUIPMENT_GENERATE_PROB) {
+					var pos = utils.prototype.createPlayer(this.map.n,this.map.m,this.map.walls.hori,this.map.walls.vert, 1);
+					var newequip = new equipment();
+					newequip.init();
+					newequip.pos.x = pos[0][0];
+					newequip.pos.y = pos[0][1];
+					this.equipments.push(newequip);
+					if (debug_mode) {
+						console.log("[DEBUG] new equipment: " + pos[0][0], pos[0][1]);
+					}
+				}
+
 				for (var i = 0; i < this.bullets.length; ++ i)
 					this.bullets[i].next(this.map.n,this.map.m,this.map.walls.hori,this.map.walls.vert);
 				for (var a in this.players) {
 					var tank = this.players[a];
 					if (tank.buff>=0) {
+						// handle operation
 						if (tank.operation.forward) {
 							tank.next(1,this.map.n,this.map.m,this.map.walls.hori,this.map.walls.vert);
 						}
@@ -260,7 +284,7 @@
 					if (this.bullets[i].restTime!=0) help.push(this.bullets[i]);
 					else
 					{	
-						if (this.bullets[i].owner!=-1 && this.players[bullets[i].owner]) this.players[this.bullets[i].owner].restBullets++;
+						if (this.bullets[i].owner!=-1 && this.players[this.bullets[i].owner]) this.players[this.bullets[i].owner].restBullets++;
 					}
 				this.bullets=help;
 				setTimeout(this.physicsLoop.bind(this), PHYSICS_LOOP_INTERVAL);
@@ -273,6 +297,7 @@
 				info.type = 'serverupdate';
 				info.players = this.players;
 				info.bullets = this.bullets;
+				info.equipments = this.equipments;
 				for (var id in this.clients) {
 					this.clients[id].emit('gameinfo', info);
 				}

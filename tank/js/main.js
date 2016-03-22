@@ -21,6 +21,7 @@ var ClientGameCore = function() {
 	this.map = {};
 	this.players = {};
 	this.bullets = [];
+	this.equipments = [];
 
 	this.newScene = function() {
 		this.map = {};
@@ -46,9 +47,10 @@ var ClientGameCore = function() {
 
 		$('#message').text('');
 	};
-	this.onServerUpdate = function(players, bullets) {
+	this.onServerUpdate = function(players, bullets, equipments) {
 		this.players = players;
 		this.bullets = bullets;
+		this.equipments = equipments;
 	}
 };
 
@@ -84,7 +86,7 @@ function init() {
 							  break;
 			case 'newscene' : game.onNewScene(data.map, data.players);
 							  break;
-			case 'serverupdate' : game.onServerUpdate(data.players, data.bullets);
+			case 'serverupdate' : game.onServerUpdate(data.players, data.bullets, data.equipments);
 								  break;
 			}
 		});
@@ -132,7 +134,7 @@ function update() {
 	clear(mainContext);
 	drawTanks();
 	drawBullets();
-	drawEuipments();
+	drawEquipments();
 
 	if (currentState != states.RUN) {
 		handleInput();
@@ -261,8 +263,7 @@ function drawTanks() {
 }
 function drawBullets() {
 	mainContext.strokeStyle = "black";
-	for (var i = 0; i < game.bullets.length; ++ i)
-	{
+	for (var i in game.bullets) {
 		x=game.bullets[i].pos.x;
 		y=game.bullets[i].pos.y;
 		r=game.bullets[i].radius;
@@ -272,7 +273,15 @@ function drawBullets() {
 	}
 }
 
-function drawEuipments() {
+function drawEquipments() {
+	mainContext.strokeStyle = "red";
+	for (var i in game.equipments) {
+		x = game.equipments[i].pos.x;
+		y = game.equipments[i].pos.y;
+		mainContext.beginPath();
+		mainContext.arc(x * tileSize + 5, y * tileSize + 5, tileSize / 6.5, 0, Math.PI * 2);
+		mainContext.fill();
+	}
 }
 
 function drawLine(context, x1,y1,x2,y2)
