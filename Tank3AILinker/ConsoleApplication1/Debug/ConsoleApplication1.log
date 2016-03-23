@@ -1,0 +1,30 @@
+﻿生成启动时间为 2016/3/18 2:27:29。
+     1>项目“D:\What_is_inside_this\学习\Tank3AILinker\ConsoleApplication1\ConsoleApplication1.vcxproj”在节点 2 上(Build 个目标)。
+     1>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V120\Microsoft.CppBuild.targets(381,5): warning MSB8028: The intermediate directory (Debug\) contains files shared from another project (ConsoleApplication1.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+     1>ClCompile:
+         D:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _SCL_SECURE_NO_WARNINGS /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt src\internal\sio_client_impl.cpp src\internal\sio_packet.cpp src\sio_client.cpp src\sio_socket.cpp
+         sio_socket.cpp
+         sio_client.cpp
+         sio_packet.cpp
+         sio_client_impl.cpp
+         正在生成代码...
+       Link:
+         D:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"D:\What_is_inside_this\学习\Tank3AILinker\Debug\Tank3AILinker.exe" /INCREMENTAL /NOLOGO /LIBPATH:D:\boost\lib boost.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:\What_is_inside_this\学习\Tank3AILinker\Debug\Tank3AILinker.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:\What_is_inside_this\学习\Tank3AILinker\Debug\Tank3AILinker.lib" /MACHINE:X86 /NODEFAULTLIB:"boost.lib" Debug\Tank3AILinker.obj
+         Debug\sio_client_impl.obj
+         Debug\sio_packet.obj
+         Debug\sio_client.obj
+         Debug\sio_socket.obj
+         Debug\stdafx.obj
+     1>boost.lib(error_code.obj) : error LNK2038: 检测到“_ITERATOR_DEBUG_LEVEL”的不匹配项:  值“0”不匹配值“2”(Tank3AILinker.obj 中)
+     1>boost.lib(error_code.obj) : error LNK2038: 检测到“RuntimeLibrary”的不匹配项:  值“MD_DynamicRelease”不匹配值“MDd_DynamicDebug”(Tank3AILinker.obj 中)
+     1>sio_socket.obj : error LNK2001: 无法解析的外部符号 __imp___CrtDbgReportW
+     1>Tank3AILinker.obj : error LNK2019: 无法解析的外部符号 __imp___CrtDbgReportW，该符号在函数 "public: bool __thiscall std::_Tree_const_iterator<class std::_Tree_val<struct std::_Tree_simple_types<struct std::pair<class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> > const ,class std::shared_ptr<class sio::message> > > > >::operator==(class std::_Tree_const_iterator<class std::_Tree_val<struct std::_Tree_simple_types<struct std::pair<class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> > const ,class std::shared_ptr<class sio::message> > > > > const &)const " (??8?$_Tree_const_iterator@V?$_Tree_val@U?$_Tree_simple_types@U?$pair@$$CBV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@V?$shared_ptr@Vmessage@sio@@@2@@std@@@std@@@std@@@std@@QBE_NABV01@@Z) 中被引用
+     1>sio_client_impl.obj : error LNK2001: 无法解析的外部符号 __imp___CrtDbgReportW
+     1>sio_packet.obj : error LNK2001: 无法解析的外部符号 __imp___CrtDbgReportW
+     1>sio_client.obj : error LNK2001: 无法解析的外部符号 __imp___CrtDbgReportW
+     1>D:\What_is_inside_this\学习\Tank3AILinker\Debug\Tank3AILinker.exe : fatal error LNK1120: 1 个无法解析的外部命令
+     1>已完成生成项目“D:\What_is_inside_this\学习\Tank3AILinker\ConsoleApplication1\ConsoleApplication1.vcxproj”(Build 个目标)的操作 - 失败。
+
+生成失败。
+
+已用时间 00:00:11.94

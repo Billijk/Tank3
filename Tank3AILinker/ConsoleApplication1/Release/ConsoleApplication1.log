@@ -1,0 +1,29 @@
+﻿生成启动时间为 2016/3/19 2:29:25。
+     1>项目“D:\What_is_inside_this\学习\Tank3AILinker\ConsoleApplication1\ConsoleApplication1.vcxproj”在节点 2 上(Build 个目标)。
+     1>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V120\Microsoft.CppBuild.targets(381,5): warning MSB8028: The intermediate directory (Release\) contains files shared from another project (ConsoleApplication1.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+     1>ClCompile:
+         D:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /sdl /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _CONSOLE /D _LIB /D _SCL_SECURE_NO_WARNINGS /D _CRT_SECURE_NO_WARNINGS /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt Tank3AILinker.cpp
+         Tank3AILinker.cpp
+     1>Tank3AILinker.cpp(156): warning C4244: “=”: 从“int64_t”转换到“int”，可能丢失数据
+     1>Tank3AILinker.cpp(157): warning C4244: “=”: 从“int64_t”转换到“int”，可能丢失数据
+     1>Tank3AILinker.cpp(167): warning C4018: “<”: 有符号/无符号不匹配
+     1>Tank3AILinker.cpp(171): warning C4018: “<”: 有符号/无符号不匹配
+     1>Tank3AILinker.cpp(180): warning C4244: “=”: 从“int64_t”转换到“int”，可能丢失数据
+     1>Tank3AILinker.cpp(189): warning C4244: “=”: 从“int64_t”转换到“int”，可能丢失数据
+     1>Tank3AILinker.cpp(205): warning C4244: “=”: 从“int64_t”转换到“int”，可能丢失数据
+     1>Tank3AILinker.cpp(381): warning C4800: “UINT”: 将值强制为布尔值“true”或“false”(性能警告)
+       Link:
+         D:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"D:\What_is_inside_this\学习\Tank3AILinker\Release\Tank3AILinker.exe" /INCREMENTAL:NO /NOLOGO boost.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:\What_is_inside_this\学习\Tank3AILinker\Release\Tank3AILinker.pdb" /SUBSYSTEM:CONSOLE /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:\What_is_inside_this\学习\Tank3AILinker\Release\Tank3AILinker.lib" /MACHINE:X86 /SAFESEH Release\Tank3AILinker.obj
+         Release\sio_client_impl.obj
+         Release\sio_packet.obj
+         Release\sio_client.obj
+         Release\sio_socket.obj
+         Release\stdafx.obj
+         正在生成代码
+         已完成代码的生成
+         ConsoleApplication1.vcxproj -> D:\What_is_inside_this\学习\Tank3AILinker\Release\Tank3AILinker.exe
+     1>已完成生成项目“D:\What_is_inside_this\学习\Tank3AILinker\ConsoleApplication1\ConsoleApplication1.vcxproj”(Build 个目标)的操作。
+
+生成成功。
+
+已用时间 00:00:07.05
