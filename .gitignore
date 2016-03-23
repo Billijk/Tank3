@@ -6,3 +6,6 @@ Session.vim
 # temporary
 .netrwhist
 *~
+# SQL database
+*.sdf
+*.pdb
