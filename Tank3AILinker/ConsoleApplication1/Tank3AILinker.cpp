@@ -58,13 +58,13 @@ public:
 	}
 };
 
+//C++风格的存储，用于直接从服务端读取
 class GameMap
 {
 public :
 	int n, m;
 	vector<vector<int>> right, down;
 };
-
 class Player
 {
 public:
@@ -77,7 +77,6 @@ public:
 		restBullets = 0;
 	}
 };
-
 class Bullet
 {
 public:
@@ -88,7 +87,57 @@ public:
 		x = y = angle = restTime = radius = 0.0;
 	}
 };
+//C风格的存储，用于向AI程序发送
+struct PlayerC
+{
+	double x, y, angle;
+	int restBullets;
+	char* id;
+	PlayerC()
+	{
+		x = y = angle = 0.0;
+		restBullets = 0;
+	}
+	~PlayerC()
+	{
+		delete[] id;
+	}
+};
+struct BulletC
+{
+	char* owner;
+	double x, y, angle, restTime, radius;
+	BulletC()
+	{
+		x = y = angle = restTime = radius = 0.0;
+	}
+	~BulletC()
+	{
+		delete[] owner;
+	}
+};
+//指令
+struct Instruction
+{
+	int MOVE_FORWARD, MOVE_LEFT, MOVE_RIGHT, MOVE_BACK, FIRE;
+	Instruction() { MOVE_FORWARD = MOVE_LEFT = MOVE_RIGHT = MOVE_BACK = FIRE = false; }
+	Instruction(int MOVE_FORWARD, int MOVE_LEFT, int MOVE_RIGHT, int MOVE_BACK, int FIRE) : \
+		MOVE_FORWARD(MOVE_FORWARD), MOVE_LEFT(MOVE_LEFT), MOVE_RIGHT(MOVE_RIGHT), MOVE_BACK(MOVE_BACK), FIRE(FIRE) {}
+};
 
+//转换器
+void copyPlayerInfo(const Player &a, PlayerC &b)
+{
+	b.angle = a.angle, b.x = a.x, b.y = a.y, b.restBullets = a.restBullets;
+	b.id = new char[a.id.length() + 1];
+	strcpy_s(b.id, a.id.length() + 1, a.id.c_str());
+}
+void copyBulletInfo(const Bullet &a, BulletC &b)
+{
+	b.angle = a.angle, b.x = a.x, b.y = a.y, b.radius = a.radius, b.restTime = a.restTime;
+	b.owner = new char[a.owner.length() + 1];
+	strcpy_s(b.owner, a.owner.length() + 1, a.owner.c_str());
+}
 
 void _hgwrite() { cout << endl; if (SAVE_LOG) logue << endl; }
 template <typename T, typename ... Args>
@@ -130,19 +179,19 @@ vector<Bullet> bullets;
 wstring AIName, libName;
 string AIName_UTF8;
 
-//指令
-class Instruction
-{
-public :
-	bool MOVE_FORWARD, MOVE_LEFT, MOVE_RIGHT, MOVE_BACK, FIRE;
-	Instruction() { MOVE_FORWARD = MOVE_LEFT = MOVE_RIGHT = MOVE_BACK = FIRE = false; }
-	Instruction(bool MOVE_FORWARD, bool MOVE_LEFT, bool MOVE_RIGHT, bool MOVE_BACK, bool FIRE) : \
-		MOVE_FORWARD(MOVE_FORWARD), MOVE_LEFT(MOVE_LEFT), MOVE_RIGHT(MOVE_RIGHT), MOVE_BACK(MOVE_BACK), FIRE(FIRE) {}
-};
-
 //调用AI中的函数的函数指针
-typedef Instruction(*getInstruction)(const map<string, Player> &, const vector<Bullet> &);
-typedef void(*setGameMap)(const GameMap &, const map<string, Player> &);
+typedef Instruction(*getInstruction)(\
+	const int &playerNum, \
+	const PlayerC* players, \
+	const int &bulletNum, \
+	const BulletC* bullets\
+);
+typedef void(*setGameMap)(\
+	const int &mapN, \
+	const int &mapM, \
+	const int* right, \
+	const int* down
+);
 
 getInstruction AIInstruction;
 setGameMap giveMap;
@@ -164,30 +213,30 @@ void read_map(message::ptr const& data)
 	//将地图的存储vector大小调整到略大于实际地图
 
 	gm.right.resize(gm.n + 10);
-	for (int i = 0; i < gm.right.size(); ++i)
+	for (int i = 0; i < gm.right.size(); ++ i)
 		gm.right[i].resize(gm.m + 10);
 
 	gm.down.resize(gm.n + 10);
-	for (int i = 0; i < gm.down.size(); ++i)
+	for (int i = 0; i < gm.down.size(); ++ i)
 		gm.down[i].resize(gm.m + 10);
 
 	//保存地图信息
 
-	for (int ii = 0; ii + 1 < gm.n; ++ii)
+	for (int ii = 0; ii + 1 < gm.n; ++ ii)
 	{
-		for (int jj = 0; jj < gm.m; ++jj)
+		for (int jj = 0; jj < gm.m; ++ jj)
 		{
-			gm.down[ii][jj] = vertwall[ii]->get_vector()[jj]->get_int();
-			gold_spray(gm.down[ii][jj], " ");
+			gm.right[ii][jj] = vertwall[ii]->get_vector()[jj]->get_int();
+			gold_spray(gm.right[ii][jj], " ");
 		}
 		gold_spray();
 	}
-	for (int ii = 0; ii < gm.n; ++ii)
+	for (int ii = 0; ii < gm.n; ++ ii)
 	{
-		for (int jj = 0; jj + 1 < gm.m; ++jj)
+		for (int jj = 0; jj + 1 < gm.m; ++ jj)
 		{
-			gm.right[ii][jj] = horiwall[ii]->get_vector()[jj]->get_int();
-			gold_spray(gm.right[ii][jj], " ");
+			gm.down[ii][jj] = horiwall[ii]->get_vector()[jj]->get_int();
+			gold_spray(gm.down[ii][jj], " ");
 		}
 		gold_spray();
 	}
@@ -203,7 +252,8 @@ void read_player(message::ptr const& data)
 		players[nowID].y = i.second->get_map()["pos"]->get_map()["y"]->get_double();
 		players[nowID].angle = i.second->get_map()["angle"]->get_double();
 		players[nowID].restBullets = i.second->get_map()["restBullets"]->get_int();
-
+		players[nowID].id = nowID;
+		
 		//调试输出
 		gold_spray("[DEBUG] Player Info: {x: ", players[nowID].x, " y: ", players[nowID].y, " angle: ", players[nowID].angle, "ID: ", nowID);
 	}
@@ -213,8 +263,8 @@ void read_bullets(message::ptr const &data)
 {
 	int cnt = 0;
 
-	//子弹的存储空间也得略大于实际子弹数
-	bullets.resize(data->get_map()["bullets"]->get_vector().size() + 10);
+	//子弹的存储空间调整到当前子弹数
+	bullets.resize(data->get_map()["bullets"]->get_vector().size());
 
 	for (auto i : data->get_map()["bullets"]->get_vector())
 	{
@@ -264,9 +314,24 @@ void bind_options(sio::socket::ptr &sock)
 			read_player(data);
 			read_bullets(data);
 
+			//将信息打包成传统风格进行发送
+			PlayerC* playersC = new PlayerC[players.size()];
+			BulletC* bulletsC = new BulletC[bullets.size()];
+
+			int cnt = 0;
+			for (auto i : players)
+				copyPlayerInfo(i.second, playersC[cnt ++]);
+			cnt = 0;
+			for (auto i : bullets)
+				copyBulletInfo(i, bulletsC[cnt ++]);
+
 			//获得当前的指令
-			Instruction ins = AIInstruction(players, bullets);
+			Instruction ins = AIInstruction(players.size(), playersC, bullets.size(), bulletsC);
 			
+			//删除打包好的C风格信息
+			delete[] playersC;
+			delete[] bulletsC;
+
 			//本当に本当にめんどいね～
 
 			object_message::ptr msgpack = object_message::create();
@@ -318,8 +383,23 @@ void bind_options(sio::socket::ptr &sock)
 			read_map(data);
 			read_player(data);
 
+			//新建一个C风格的地图信息存储表
+			int *right = new int[(gm.n - 1) * gm.m];
+			int *down = new int[gm.n * (gm.m - 1)];
+
+			for (int i = 0; i + 1 < gm.n; ++ i)
+				for (int j = 0; j < gm.m; ++ j)
+					right[i * gm.m + j] = gm.right[i][j];
+			for (int i = 0; i < gm.n; ++ i)
+				for (int j = 0; j + 1 < gm.m; ++ j)
+					down[i * (gm.m - 1) + j] = gm.down[i][j];
+
 			//把地图信息交给AI
-			giveMap(gm, players);
+			giveMap(gm.n, gm.m, right, down);
+
+			//扔掉它们
+			delete[] right;
+			delete[] down;
 		}
 
 		_lock.unlock();
@@ -332,8 +412,8 @@ bool linkAI()
 	HINSTANCE hDLL = LoadLibrary(libName.c_str());
 	if (hDLL)
 	{
-		AIInstruction = (getInstruction)GetProcAddress(hDLL, "_Z15giveInstructionRKSt3mapISs6PlayerSt4lessISsESaISt4pairIKSsS0_EEERKSt6vectorI6BulletSaISB_EE");
-		giveMap = (setGameMap)GetProcAddress(hDLL, "_Z10setMapInfoRK7GameMapRKSt3mapISs6PlayerSt4lessISsESaISt4pairIKSsS3_EEE");
+		AIInstruction = (getInstruction)GetProcAddress(hDLL, "giveInstruction");
+		giveMap = (setGameMap)GetProcAddress(hDLL, "setMapInfo");
 		if (AIInstruction && giveMap)
 			return true;
 		else heart_gold_spray("[通知] 寻找函数地址失败！");

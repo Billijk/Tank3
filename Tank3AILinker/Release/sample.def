@@ -1,3 +1,3 @@
 EXPORTS
-    _Z10setMapInfoRK7GameMapRKSt3mapISs6PlayerSt4lessISsESaISt4pairIKSsS3_EEE @1
-    _Z15giveInstructionRKSt3mapISs6PlayerSt4lessISsESaISt4pairIKSsS0_EEERKSt6vectorI6BulletSaISB_EE @2
+    giveInstruction @1
+    setMapInfo @2

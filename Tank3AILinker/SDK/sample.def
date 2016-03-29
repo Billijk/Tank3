@@ -1,0 +1,3 @@
+EXPORTS
+    giveInstruction @1
+    setMapInfo @2
